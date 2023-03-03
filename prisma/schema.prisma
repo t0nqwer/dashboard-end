@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Userrole {
+  role_Id   Int    @id @default(autoincrement())
+  role_name String
+  user      User[]
+}
+
+model User {
+  Username        String   @id
+  First_Name      String
+  Last_Name       String
+  Mobile          Int?
+  Email           String?
+  Password_Hash   String
+  Registtered     DateTime
+  Last_Login      DateTime
+  profile_picture String?
+  role            Userrole @relation(fields: [roleid], references: [role_Id])
+  roleid          Int
+
+  @@index([roleid])
+}
+
+model DesignBrand {
+  DesignBrand_ID   Int            @id @default(autoincrement())
+  DesignBrand_Name String
+  ClothDesign      Cloth_Design[]
+}
+
+model Design_Category {
+  Design_Category_ID   Int            @id @default(autoincrement())
+  Design_Category_Name String
+  ClothDesign          Cloth_Design[]
+}
+
+model PatternDesign {
+  Pattern_Design_ID   Int            @id @default(autoincrement())
+  Pattern_Design_Name String
+  ClothDesign         Cloth_Design[]
+}
+
+model Cloth_Design {
+  Code                String              @id
+  Front_Img           String              @db.Text
+  Back_Img            String              @db.Text
+  Front_Thumbnail     String              @db.Text
+  Back_Thumbnail      String              @db.Text
+  Design_Name         String              @db.Text
+  Product_Description String?             @db.Text
+  Brand               DesignBrand         @relation(fields: [Brand_ID], references: [DesignBrand_ID])
+  Brand_ID            Int
+  Category            Design_Category     @relation(fields: [Category_ID], references: [Design_Category_ID])
+  Category_ID         Int
+  Pattern             PatternDesign       @relation(fields: [Pattern_ID], references: [Pattern_Design_ID])
+  Pattern_ID          Int
+  Detail_img          Design_Detail_img[]
+  Size                Size_Info[]
+
+  @@index([Brand_ID])
+  @@index([Category_ID])
+  @@index([Pattern_ID])
+}
+
+model Design_Detail_img {
+  Design_Detail_img_ID Int          @id @default(autoincrement())
+  Design               Cloth_Design @relation(fields: [code], references: [Code])
+  code                 String
+
+  @@index([code])
+}
+
+model Size {
+  Size_ID   String      @id @db.VarChar(10)
+  Size_Info Size_Info[]
+}
+
+model Size_Info {
+  Size_Info_ID String       @id @db.VarChar(50)
+  Design       Cloth_Design @relation(fields: [code], references: [Code])
+  Size         Size         @relation(fields: [Size_ID], references: [Size_ID])
+  Size_ID      String       @db.VarChar(10)
+  code         String
+
+  @@index([code])
+  @@index([Size_ID])
+}
+
+model Size_De {
+  Size_De_ID   Int            @id @default(autoincrement())
+  Size_De_Name String         @db.VarChar(100)
+  Size_De_Info Size_De_Info[]
+}
+
+model Size_De_Info {
+  Size_De_Info_ID Int     @id @default(autoincrement())
+  Detail          Size_De @relation(fields: [Size_De_ID], references: [Size_De_ID])
+  Size_De_ID      Int
+  Info            Decimal @db.Decimal(5, 2)
+  @@index([Size_De_ID])
+}
