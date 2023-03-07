@@ -14,3 +14,15 @@ export const GetDataForImport = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const AddNewDesign = async (req, res) => {
+  try {
+    prisma.size_De_Info.create({
+      data: {
+        Size_De_ID: 4,
+        Size_Info_ID: "",
+        Info: 4,
+      },
+    });
+  } catch (error) {}
+};

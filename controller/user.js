@@ -20,6 +20,15 @@ export const LogInUser = async (req, res) => {
       where: {
         Username: username,
       },
+      select: {
+        Email: true,
+        First_Name: true,
+        role: true,
+        Mobile: true,
+        Last_Name: true,
+        Username: true,
+        Password_Hash: true,
+      },
     });
 
     if (finduser === null) {

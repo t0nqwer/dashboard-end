@@ -84,11 +84,12 @@ model Size {
 }
 
 model Size_Info {
-  Size_Info_ID String       @id @db.VarChar(50)
-  Design       Cloth_Design @relation(fields: [code], references: [Code])
-  Size         Size         @relation(fields: [Size_ID], references: [Size_ID])
-  Size_ID      String       @db.VarChar(10)
+  Size_Info_ID String         @id @db.VarChar(50)
+  Design       Cloth_Design   @relation(fields: [code], references: [Code])
+  Size         Size           @relation(fields: [Size_ID], references: [Size_ID])
+  Size_ID      String         @db.VarChar(10)
   code         String
+  Size_De_Info Size_De_Info[]
 
   @@index([code])
   @@index([Size_ID])
@@ -101,9 +102,13 @@ model Size_De {
 }
 
 model Size_De_Info {
-  Size_De_Info_ID Int     @id @default(autoincrement())
-  Detail          Size_De @relation(fields: [Size_De_ID], references: [Size_De_ID])
+  Size_De_Info_ID Int       @id @default(autoincrement())
+  Detail          Size_De   @relation(fields: [Size_De_ID], references: [Size_De_ID])
   Size_De_ID      Int
-  Info            Decimal @db.Decimal(5, 2)
+  Size_Info       Size_Info @relation(fields: [Size_Info_ID], references: [Size_Info_ID])
+  Size_Info_ID    String
+  Info            Decimal   @db.Decimal(5, 2)
+
   @@index([Size_De_ID])
+  @@index([Size_Info_ID])
 }
