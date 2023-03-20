@@ -3,17 +3,18 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import pkg from "jsonwebtoken";
 import validator from "validator";
-
 dotenv.config();
 const prisma = new PrismaClient();
 const { decode, verify, sign } = pkg;
 const createToken = (id) => {
   return sign({ id }, process.env.SECRET, { expiresIn: "1h" });
 };
+const createRefreshToken = (id) => {
+  return sign({ id }, process.env.SECRETREFRESH, { expiresIn: "1y" });
+};
 
 export const LogInUser = async (req, res) => {
   const { username, password } = req.body;
-
   console.log(username, password);
   try {
     const finduser = await prisma.user.findUnique({
@@ -34,12 +35,24 @@ export const LogInUser = async (req, res) => {
     if (finduser === null) {
       throw Error("Incorrect id");
     }
-    console.log(password, finduser.Password_Hash);
     const match = await bcrypt.compare(password, finduser.Password_Hash);
     if (match) {
       const token = createToken(finduser.Username);
-      //   throw Error(JSON.stringify({ user: finduser, token }));
-      return res.json({ user: finduser, token });
+      const checkToken = await prisma.refreshToken.findUnique({
+        where: {
+          Username: finduser.Username,
+        },
+      });
+      if (!checkToken) {
+        const refreshToken = createRefreshToken(finduser.Username);
+        await prisma.refreshToken.create({
+          data: {
+            Username: finduser.Username,
+            Token: refreshToken,
+          },
+        });
+      }
+      return res.json({ user: finduser, token, username: finduser.Username });
     } else {
       throw Error("Incorrect password");
     }
@@ -81,6 +94,22 @@ export const SignUpUser = async (req, res) => {
     const returndata = { user, token };
     res.json(returndata);
   } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const LogoutUser = async (req, res) => {
+  const { user } = req.body;
+  console.log(user);
+  try {
+    const remove = await prisma.refreshToken.deleteMany({
+      where: {
+        Username: user,
+      },
+    });
+    res.status(200).json({ remove });
+  } catch (error) {
+    console.log(error.message);
     res.status(400).json({ error: error.message });
   }
 };

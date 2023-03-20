@@ -6,6 +6,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 import userRoutes from "./routes/user.js";
 import designRoutes from "./routes/design.js";
+import productRoutes from "./routes/product.js";
+import fabricRoutes from "./routes/fabric.js";
 
 dotenv.config();
 const app = express();
@@ -21,6 +23,8 @@ app.use(cors());
 
 app.use("/design", designRoutes);
 app.use("/user", userRoutes);
+app.use("/product", productRoutes);
+app.use("/fabric", fabricRoutes);
 
 const port = parseInt(process.env.PORT) || 7070;
 app.listen(port, () => {

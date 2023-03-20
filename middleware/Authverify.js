@@ -1,11 +1,16 @@
-import { verify } from "jsonwebtoken";
+import pkg from "jsonwebtoken";
+const { verify, sign } = pkg;
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-
-const requireAuth = async (req, res, next) => {
+const createToken = (id) => {
+  return sign({ id }, process.env.SECRET, { expiresIn: "15m" });
+};
+export const requireAuth = async (req, res, next) => {
   // verify user is authenticated
-  const { authorization } = req.headers;
-
+  const { authorization, username } = req.headers;
+  if (!username) {
+    return res.status(401).json({ error: "Request timeout" });
+  }
   if (!authorization) {
     return res.status(401).json({ error: "Authorization token required" });
   }
@@ -13,19 +18,40 @@ const requireAuth = async (req, res, next) => {
   const token = authorization.split(" ")[1];
 
   try {
-    const { _id } = verify(token, process.env.SECRET);
-
-    req.user = await prisma.user.findUnique({
-      where: {
-        Username: _id,
-      },
-      select: {
-        Username: true,
-      },
-    });
+    const tooo = verify(token, process.env.SECRET);
     next();
   } catch (error) {
-    console.log(error);
-    res.status(401).json({ error: "Request is not authorized" });
+    if (error.message === "jwt expired") {
+      const refreshToken = await prisma.refreshToken.findUnique({
+        where: {
+          Username: username,
+        },
+      });
+
+      try {
+        const data = verify(refreshToken.Token, process.env.SECRETREFRESH);
+
+        const finduser = await prisma.user.findUnique({
+          where: {
+            Username: data.id,
+          },
+          select: {
+            Email: true,
+            First_Name: true,
+            role: true,
+            Mobile: true,
+            Last_Name: true,
+            Username: true,
+          },
+        });
+        const token = createToken(username);
+        req.user = { user: finduser, token, username: username };
+        next();
+      } catch (error) {
+        res.status(401).json({ error: "Request timeout" });
+      }
+    } else {
+      res.status(401).json({ error: "Request is not authorized" });
+    }
   }
 };
