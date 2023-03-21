@@ -63,6 +63,11 @@ export const LogInUser = async (req, res) => {
 export const SignUpUser = async (req, res) => {
   const { firstName, lastName, Username, email, password } = req.body;
   console.log(firstName, lastName, Username, email, password);
+  const finduser = await prisma.user.findUnique({
+    where: {
+      Username: Username,
+    },
+  });
   try {
     if (!email || !password) {
       throw Error("All fields must be filled");
@@ -70,12 +75,14 @@ export const SignUpUser = async (req, res) => {
     if (!validator.isEmail(email)) {
       throw Error("Email not valid");
     }
+    if (finduser) {
+      throw Error("มีบัญชีนี้ในระบบแล้ว");
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
     const user = await prisma.user.create({
       data: {
-        User_ID: 122235,
         First_Name: firstName,
         Last_Name: lastName,
         Mobile: 1122,

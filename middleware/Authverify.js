@@ -8,6 +8,8 @@ const createToken = (id) => {
 export const requireAuth = async (req, res, next) => {
   // verify user is authenticated
   const { authorization, username } = req.headers;
+  // console.log(req.headers);
+  // console.log("username", username);
   if (!username) {
     return res.status(401).json({ error: "Request timeout" });
   }
@@ -19,15 +21,18 @@ export const requireAuth = async (req, res, next) => {
 
   try {
     const tooo = verify(token, process.env.SECRET);
+    // console.log(tooo);
     next();
   } catch (error) {
+    // console.log(error.message);
+    // console.log(username);
     if (error.message === "jwt expired") {
       const refreshToken = await prisma.refreshToken.findUnique({
         where: {
           Username: username,
         },
       });
-
+      console.log("refreshToken", refreshToken);
       try {
         const data = verify(refreshToken.Token, process.env.SECRETREFRESH);
 
@@ -44,6 +49,7 @@ export const requireAuth = async (req, res, next) => {
             Username: true,
           },
         });
+        console.log("finduser", finduser);
         const token = createToken(username);
         req.user = { user: finduser, token, username: username };
         next();
