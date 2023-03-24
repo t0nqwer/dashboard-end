@@ -29,12 +29,13 @@ export const GetDataForImport = async (req, res) => {
 };
 
 export const AddNewDesign = async (req, res) => {
-  console.log(req.body);
+  console.log("sentdata", req.body);
   const data = req.body.data;
+
   const img = req.body.img;
   const Size = req.body.size;
   const user = req.user;
-
+  console.log(data);
   const Size_info_data = [...new Set(Size.map((e) => e.size))];
 
   try {
