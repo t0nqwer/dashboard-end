@@ -32,7 +32,7 @@ export const addKhwanta = async (req, res) => {
   const data = req.body.data;
   const img = req.body.img;
   const user = req.user;
-
+  console.log(data);
   try {
     const product = await prisma.product.create({
       data: {
@@ -44,6 +44,7 @@ export const addKhwanta = async (req, res) => {
         Back_Thumbnail: img[1],
         Product_Category_ID: +data.category_id,
         Product_Supplier_ID: 1,
+        Description: data.descript,
       },
     });
 
@@ -81,6 +82,7 @@ export const addImport = async (req, res) => {
         Back_Thumbnail: img[1],
         Product_Category_ID: +data.category_id,
         Product_Supplier_ID: +data.supplier_id,
+        Description: data.descript,
       },
     });
 
@@ -140,9 +142,131 @@ export const addCloth = async (req, res) => {
   }
 };
 export const productList = async (req, res) => {
-  console.log(req.user);
   const user = req.user;
+  const { search, page } = req.query;
+  const limit = 20;
+  const numberStartIndex = (+page - 1) * limit;
+
   try {
+    const countCloth = await prisma.product_Cloth.count({
+      where: {
+        OR: [
+          {
+            code: { contains: search },
+          },
+          {
+            fabric: {
+              Type: {
+                name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Color: {
+                FabricColorTechnique_name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Pattern: {
+                FabricPatternName: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Weaving: {
+                weaving_name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            design: { Design_Name: { contains: search } },
+          },
+          {
+            design: {
+              Category: { Design_Category_Name: { contains: search } },
+            },
+          },
+          {
+            design: {
+              Brand: {
+                DesignBrand_Name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            design: {
+              Pattern: {
+                Pattern_Design_Name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            description: {
+              contains: search,
+            },
+          },
+        ],
+      },
+    });
+    const NonClothProductcount = await prisma.product.count({
+      where: {
+        OR: [
+          {
+            Title: {
+              contains: search,
+            },
+          },
+          {
+            Description: {
+              contains: search,
+            },
+          },
+          {
+            product_category: {
+              Product_Category_Name: {
+                contains: search,
+              },
+            },
+          },
+          {
+            Supplier: {
+              Name: {
+                contains: search,
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    const numberPage = (countCloth + NonClothProductcount) / limit;
+    const clothindex = numberStartIndex < countCloth ? numberStartIndex : 0;
+    const clothtake =
+      countCloth > numberStartIndex
+        ? countCloth - numberStartIndex > 20
+          ? 20
+          : countCloth - numberStartIndex
+        : 0;
+    const NonClothindex =
+      countCloth > numberStartIndex ? 0 : numberStartIndex - countCloth + 1;
+    const NonClothtake = limit - clothtake;
+
     const NonClothProduct = await prisma.product.findMany({
       select: {
         Product_ID: true,
@@ -152,6 +276,36 @@ export const productList = async (req, res) => {
         product_category: true,
         Supplier: true,
       },
+      where: {
+        OR: [
+          {
+            Title: {
+              contains: search,
+            },
+          },
+          {
+            Description: {
+              contains: search,
+            },
+          },
+          {
+            product_category: {
+              Product_Category_Name: {
+                contains: search,
+              },
+            },
+          },
+          {
+            Supplier: {
+              Name: {
+                contains: search,
+              },
+            },
+          },
+        ],
+      },
+      skip: NonClothindex,
+      take: NonClothtake,
     });
     const ClothProduct = await prisma.product_Cloth.findMany({
       select: {
@@ -171,6 +325,82 @@ export const productList = async (req, res) => {
         Front_Thumbnail: true,
         price: true,
       },
+      where: {
+        OR: [
+          {
+            code: { contains: search },
+          },
+          {
+            fabric: {
+              Type: {
+                name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Color: {
+                FabricColorTechnique_name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Pattern: {
+                FabricPatternName: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Weaving: {
+                weaving_name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            design: { Design_Name: { contains: search } },
+          },
+          {
+            design: {
+              Category: { Design_Category_Name: { contains: search } },
+            },
+          },
+          {
+            design: {
+              Brand: {
+                DesignBrand_Name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            design: {
+              Pattern: {
+                Pattern_Design_Name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            description: {
+              contains: search,
+            },
+          },
+        ],
+      },
+      skip: clothindex,
+      take: clothtake,
     });
     const Cloth = ClothProduct.map((e) => {
       return {
@@ -185,8 +415,12 @@ export const productList = async (req, res) => {
             : `ผ้า${e.fabric.Type.name}${e.fabric.Weaving.weaving_name}${e.fabric.Pattern.FabricPatternName}`,
       };
     });
-    res.status(200).json({ NonClothProduct, Cloth, user });
+
+    res
+      .status(200)
+      .json({ NonClothProduct, Cloth, user, page: { numberPage } });
   } catch (error) {
+    console.log(error.message);
     res.status(400).json({ error: error.message });
   }
 };
@@ -251,7 +485,7 @@ export const getAddImport = async (req, res) => {
 
 export const getSingleProduct = async (req, res) => {
   const user = req.user;
-  console.log(req.params.id);
+
   try {
     const product = await prisma.product.findUnique({
       where: {
@@ -273,7 +507,7 @@ export const getSingleProduct = async (req, res) => {
         },
       },
     });
-    console.log(product);
+
     res.status(200).json({ product, user });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -336,7 +570,6 @@ export const getSingleCloth = async (req, res) => {
       },
     });
 
-    console.log(product);
     res.status(200).json({ product, user });
   } catch (error) {
     res.status(400).json({ error: "" });
@@ -402,9 +635,61 @@ export const updateDetailPhoto = async (req, res) => {
       res.status(200).json({ Success: "เพิ่มรูปเรียนร้อย", user, addphoto });
     }
     if (input.type === "Cloth") {
-      res.status(200).json({ Success: "เพิ่มรูปเรียนร้อย", user });
+      const addphoto = await prisma.product_Cloth_Detail.create({
+        data: {
+          Product_ID: +input.Product_ID,
+          Img_Url: input.url,
+        },
+      });
+
+      res.status(200).json({ Success: "เพิ่มรูปเรียนร้อย", user, addphoto });
     }
   } catch (error) {
+    console.log(error.message);
     res.status(400).json({ error: "ไม่สามารถเพิ่มรูปได้" });
+  }
+};
+
+export const deletePhoto = async (req, res) => {
+  const user = req.user;
+  const input = req.body;
+  console.log(input);
+  try {
+    const desertRef = ref(storage, input.url);
+
+    deleteObject(desertRef)
+      .then(async () => {
+        if (input.type === "Product") {
+          await prisma.product_Detail.deleteMany({
+            where: {
+              Img_Url: input.url,
+            },
+          });
+          res.status(200).json({
+            Success: "ลบรูปเรียบร้อย",
+            user,
+          });
+        }
+        if (input.type === "Cloth") {
+          await prisma.product_Cloth_Detail.deleteMany({
+            where: {
+              Img_Url: input.url,
+            },
+          });
+          res.status(200).json({
+            Success: "ลบรูปเรียบร้อย",
+            user,
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error.message);
+        res.status(400).json({ error: "ไม่สามารถลบรูปได้" });
+      });
+  } catch (error) {
+    console.log(error.message);
+    res
+      .status(400)
+      .json({ error: "ไม่สามารถเรียกดูข้อมูลได้ โปรดลองอีกครั้ง" });
   }
 };

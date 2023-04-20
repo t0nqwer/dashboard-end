@@ -12,6 +12,7 @@ import {
   getSingleProduct,
   deleteDetailPhoto,
   updateDetailPhoto,
+  deletePhoto,
 } from "../controller/product.js";
 import { requireAuth } from "../middleware/Authverify.js";
 
@@ -30,5 +31,6 @@ router.get("/getSingleCloth/:id", getSingleCloth);
 router.get("/getSingleProduct/:id", getSingleProduct);
 router.post("/deleteDetailPhoto", deleteDetailPhoto);
 router.post("/updateDetail", updateDetailPhoto);
+router.post("/deletePhoto", deletePhoto);
 
 export default router;

@@ -6,6 +6,12 @@ export const AddFabricPattern = async (req, res) => {
   const user = req.user;
 
   try {
+    const check = await prisma.fabricPattern.findMany({
+      where: {
+        FabricPatternName: input.name,
+      },
+    });
+    if (check.length > 0) throw Error("มีลายผ้าในระบบแล้ว");
     const data = await prisma.fabricPattern.create({
       data: {
         FabricPatternName: input.name,
@@ -18,7 +24,32 @@ export const AddFabricPattern = async (req, res) => {
       user,
     });
   } catch (error) {
-    res.status(400).json({ error: "ไม่สามารถเพิ่มได้" });
+    res.status(400).json({ error: error.message });
+  }
+};
+export const AddFabricWeaving = async (req, res) => {
+  const input = req.body;
+  const user = req.user;
+  try {
+    const check = await prisma.fabric_Weaving.findMany({
+      where: {
+        weaving_name: input.name,
+      },
+    });
+    if (check.length > 0) throw Error("มีผ้านี้ในระบบแล้ว");
+    const data = await prisma.fabric_Weaving.create({
+      data: {
+        weaving_name: input.name,
+        weaving_description: input.descript,
+      },
+    });
+    res.status(200).json({
+      Success: "เพิ่มเทคนิคการทอผ้าเรียบร้อย",
+      data: data,
+      user,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };
 export const AddFabric = async (req, res) => {

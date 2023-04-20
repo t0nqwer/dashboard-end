@@ -97,7 +97,7 @@ model Size {
 }
 
 model Size_Info {
-  Size_Info_ID String         @id @db.VarChar(50)
+  Size_Info_ID String         @id @db.VarChar(50) @unique
   Design       Cloth_Design   @relation(fields: [code], references: [Code])
   Size         Size           @relation(fields: [Size_ID], references: [Size_ID])
   Size_ID      String         @db.VarChar(10)
@@ -115,12 +115,12 @@ model Size_De {
 }
 
 model Size_De_Info {
-  Size_De_Info_ID Int       @id @default(autoincrement())
+  Size_De_Info_ID String      @id 
   Detail          Size_De   @relation(fields: [Size_De_ID], references: [Size_De_ID])
   Size_De_ID      Int
   Size_Info       Size_Info @relation(fields: [Size_Info_ID], references: [Size_Info_ID])
   Size_Info_ID    String
-  Info            Decimal   @db.Decimal(5, 2)
+  Info            Decimal   @db.Decimal(10, 2)
 
   @@index([Size_De_ID])
   @@index([Size_Info_ID])
@@ -194,6 +194,7 @@ model Product_Cloth {
   Front_img            String                 @db.Text
   Back_img             String                 @db.Text
   Front_Thumbnail      String                 @db.Text
+  Forweb               Boolean @default(false)
   design               Cloth_Design           @relation(fields: [code], references: [Code])
   fabric               Fabric                 @relation(fields: [fabric_id], references: [Fabric_ID])
   price                Decimal                @db.Decimal(20, 2)
@@ -215,6 +216,7 @@ model Product_Cloth_Detail {
 model Fabric_Weaving {
   weaving_ID   Int      @id @default(autoincrement())
   weaving_name String
+  weaving_description String @db.Text @default("")
   fabric       Fabric[]
 }
 
