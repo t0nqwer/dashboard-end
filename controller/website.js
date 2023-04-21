@@ -23,6 +23,45 @@ export const GetProductforWeb = async (req, res) => {
             Type: true,
           },
         },
+        design: {
+          select: {
+            Design_Name: true,
+            Brand: true,
+            Category: true,
+            Pattern: true,
+          },
+        },
+        Front_Thumbnail: true,
+        Front_img: true,
+        Back_img: true,
+        price: true,
+      },
+    });
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+export const GetSingleProductforWeb = async (req, res) => {
+  const { id } = req.params;
+  const user = req.user;
+  try {
+    const data = await prisma.product_Cloth.findMany({
+      where: {
+        Forweb: true,
+      },
+      select: {
+        product_id: true,
+        code: true,
+        fabric: {
+          select: {
+            Fabric_ID: true,
+            Weaving: true,
+            Color: true,
+            Pattern: true,
+            Type: true,
+          },
+        },
         description: true,
         design: {
           select: {
