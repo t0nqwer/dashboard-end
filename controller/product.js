@@ -402,6 +402,7 @@ export const productList = async (req, res) => {
       skip: clothindex,
       take: clothtake,
     });
+    console.log(ClothProduct);
     const Cloth = ClothProduct.map((e) => {
       return {
         Id: e.product_id,
@@ -411,10 +412,21 @@ export const productList = async (req, res) => {
         Front_Thumbnail: e.Front_Thumbnail,
         fabric:
           e.fabric.Color.FabricColorTechnique_ID !== 1
-            ? `ผ้า${e.fabric.Type.name}${e.fabric.Weaving.weaving_name}ย้อมสี${e.fabric.Color.FabricColorTechnique_name}${e.fabric.Pattern.FabricPatternName}`
-            : `ผ้า${e.fabric.Type.name}${e.fabric.Weaving.weaving_name}${e.fabric.Pattern.FabricPatternName}`,
+            ? `ผ้า${e.fabric.Type.name}${e.fabric.Weaving.weaving_name}ย้อมสี${
+                e.fabric.Color.FabricColorTechnique_name
+              }${
+                e?.fabric?.Pattern?.FabricPatternName
+                  ? e?.fabric?.Pattern?.FabricPatternName
+                  : ""
+              }`
+            : `ผ้า${e.fabric.Type.name}${e.fabric.Weaving.weaving_name}${
+                e?.fabric?.Pattern?.FabricPatternName
+                  ? e?.fabric?.Pattern?.FabricPatternName
+                  : ""
+              }`,
       };
     });
+    console.log(Cloth);
 
     res
       .status(200)
