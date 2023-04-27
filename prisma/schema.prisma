@@ -195,6 +195,7 @@ model Product_Cloth {
   Back_img             String                 @db.Text
   Front_Thumbnail      String                 @db.Text
   Forweb               Boolean @default(false)
+  IsHero Boolean @default(false)
   design               Cloth_Design           @relation(fields: [code], references: [Code])
   fabric               Fabric                 @relation(fields: [fabric_id], references: [Fabric_ID])
   price                Decimal                @db.Decimal(20, 2)
