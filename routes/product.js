@@ -13,11 +13,12 @@ import {
   deleteDetailPhoto,
   updateDetailPhoto,
   deletePhoto,
+  updateWebStatus,
 } from "../controller/product.js";
 import { requireAuth } from "../middleware/Authverify.js";
 
 const router = express.Router();
-router.use(requireAuth);
+// router.use(requireAuth);
 
 router.post("/addSupplier", addSupplier);
 router.post("/addKhwanta", addKhwanta);
@@ -32,5 +33,6 @@ router.get("/getSingleProduct/:id", getSingleProduct);
 router.post("/deleteDetailPhoto", deleteDetailPhoto);
 router.post("/updateDetail", updateDetailPhoto);
 router.post("/deletePhoto", deletePhoto);
+router.post("/changeWebStatus", updateWebStatus);
 
 export default router;

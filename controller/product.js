@@ -537,6 +537,8 @@ export const getSingleCloth = async (req, res) => {
       select: {
         product_id: true,
         code: true,
+        Forweb: true,
+        IsHero: true,
         fabric: {
           select: {
             Fabric_ID: true,
@@ -703,5 +705,69 @@ export const deletePhoto = async (req, res) => {
     res
       .status(400)
       .json({ error: "ไม่สามารถเรียกดูข้อมูลได้ โปรดลองอีกครั้ง" });
+  }
+};
+
+export const updateWebStatus = async (req, res) => {
+  const user = req.user;
+  console.log(req.body);
+  try {
+    const update = await prisma.product_Cloth.update({
+      where: { product_id: +req.body.id },
+      data: { Forweb: req.body.ForWeb, IsHero: req.body.IsHero },
+      select: {
+        product_id: true,
+        code: true,
+        Forweb: true,
+        IsHero: true,
+        fabric: {
+          select: {
+            Fabric_ID: true,
+            Weaving: true,
+            Color: true,
+            Pattern: true,
+            Type: true,
+          },
+        },
+        description: true,
+        design: {
+          select: {
+            Design_Name: true,
+            Brand: true,
+            Category: true,
+            Pattern: true,
+            Size: {
+              select: {
+                Size_ID: true,
+                Size_De_Info: {
+                  select: {
+                    Detail: true,
+                    Info: true,
+                  },
+                },
+              },
+              orderBy: {
+                Size: {
+                  Size_Sort: "asc",
+                },
+              },
+            },
+          },
+        },
+        Front_img: true,
+        Back_img: true,
+        price: true,
+        Product_Cloth_Detail: {
+          select: {
+            Img_Url: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({ update, user, Success: "อัพเดทสถานะเรียนร้อย" });
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).json({ error: "" });
   }
 };
