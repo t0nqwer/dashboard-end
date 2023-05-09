@@ -97,12 +97,13 @@ model Size {
 }
 
 model Size_Info {
-  Size_Info_ID String         @id @db.VarChar(50) @unique
+  Size_Info_ID String         @id @unique @db.VarChar(50)
   Design       Cloth_Design   @relation(fields: [code], references: [Code])
   Size         Size           @relation(fields: [Size_ID], references: [Size_ID])
   Size_ID      String         @db.VarChar(10)
   code         String
   Size_De_Info Size_De_Info[]
+  Stock_Info   Stock_Info[]
 
   @@index([code])
   @@index([Size_ID])
@@ -115,7 +116,7 @@ model Size_De {
 }
 
 model Size_De_Info {
-  Size_De_Info_ID String      @id 
+  Size_De_Info_ID String    @id
   Detail          Size_De   @relation(fields: [Size_De_ID], references: [Size_De_ID])
   Size_De_ID      Int
   Size_Info       Size_Info @relation(fields: [Size_Info_ID], references: [Size_Info_ID])
@@ -146,6 +147,7 @@ model Product {
   Supplier            Product_Supplier @relation(fields: [Product_Supplier_ID], references: [ID])
   Product_Supplier_ID Int
   Product_Detail      Product_Detail[]
+  Stock_Info          Stock_Info[]
 
   @@index([Product_Supplier_ID])
   @@index([Product_Category_ID])
@@ -194,12 +196,13 @@ model Product_Cloth {
   Front_img            String                 @db.Text
   Back_img             String                 @db.Text
   Front_Thumbnail      String                 @db.Text
-  Forweb               Boolean @default(false)
-  IsHero Boolean @default(false)
+  Forweb               Boolean                @default(false)
+  IsHero               Boolean                @default(false)
   design               Cloth_Design           @relation(fields: [code], references: [Code])
   fabric               Fabric                 @relation(fields: [fabric_id], references: [Fabric_ID])
   price                Decimal                @db.Decimal(20, 2)
   Product_Cloth_Detail Product_Cloth_Detail[]
+  Stock_Info           Stock_Info[]
 
   @@index([fabric_id])
   @@index([code])
@@ -215,10 +218,15 @@ model Product_Cloth_Detail {
 }
 
 model Fabric_Weaving {
-  weaving_ID   Int      @id @default(autoincrement())
-  weaving_name String
-  weaving_description String @db.Text @default("")
-  fabric       Fabric[]
+  weaving_ID          Int      @id @default(autoincrement())
+  weaving_name        String
+  weaving_description String   @default("") @db.Text
+  fabric              Fabric[]
+}
+
+model Fabric_Color_Pattern {
+  Fabric_Color_Pattern_Id   Int    @id @default(autoincrement())
+  Fabric_Color_Pattern_Name String
 }
 
 model Fabric_Color_Technique {
@@ -238,4 +246,18 @@ model FabricType {
   ID     Int      @id @default(autoincrement())
   name   String
   fabric Fabric[]
+}
+
+model Stock_Info {
+  Barcode          String         @id
+  Product_Cloth_Id Int?
+  Product_Id       Int?
+  Size_Info_Id     String?
+  Product          Product?       @relation(fields: [Product_Id], references: [Product_ID])
+  Product_Cloth    Product_Cloth? @relation(fields: [Product_Cloth_Id], references: [product_id])
+  Size_Info        Size_Info?     @relation(fields: [Size_Info_Id], references: [Size_Info_ID])
+
+  @@index([Product_Cloth_Id])
+  @@index([Product_Id])
+  @@index([Size_Info_Id])
 }
