@@ -155,6 +155,7 @@ export const getDataForStock = async (req, res) => {
           name: item.Product_Cloth.design.Design_Name,
           size: item.Size_Info.Size_ID,
           cloth: true,
+          price: item.Product_Cloth.price,
         };
     });
     res.status(200).json(data);
