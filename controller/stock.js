@@ -125,16 +125,35 @@ export const getDataForStock = async (req, res) => {
       },
     });
     const data = getclothpruduct.map((item) => {
-      return {
-        barcode: item.Barcode,
-        code: "",
-        name: "",
-        price: "",
-        fabric: "",
-        brand: "",
-      };
+      if (item.Product)
+        return {
+          barcode: item.Barcode,
+          code: "",
+          name: item.Product.Title,
+          price: item.Product.Price,
+          fabric: "",
+          brand: item.Product.Supplier.Name,
+        };
+      if (item.Product_Cloth)
+        return {
+          barcode: item.Barcode,
+          code: item.Product_Cloth.code,
+          fabric: `ผ้า${item.Product_Cloth.fabric.Type.name}${
+            item.Product_Cloth.fabric.Weaving.weaving_name
+          }${
+            item.Product_Cloth.fabric.Color.FabricColorTechnique_name === "เคมี"
+              ? ""
+              : `ย้อมสี${item.Product_Cloth.fabric.Color.FabricColorTechnique_name}`
+          }${
+            item.Product_Cloth.fabric?.Pattern?.FabricPatternName
+              ? `${item.Product_Cloth.fabric.Pattern.FabricPatternName}`
+              : ""
+          }`,
+          brand: item.Product_Cloth.design.Brand.DesignBrand_Name,
+          name: item.Product_Cloth.design.Design_Name,
+        };
     });
-    res.status(200).json(getclothpruduct);
+    res.status(200).json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
