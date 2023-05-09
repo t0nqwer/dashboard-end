@@ -133,6 +133,8 @@ export const getDataForStock = async (req, res) => {
           price: item.Product.Price,
           fabric: "",
           brand: item.Product.Supplier.Name,
+          size: "",
+          cloth: false,
         };
       if (item.Product_Cloth)
         return {
@@ -151,6 +153,8 @@ export const getDataForStock = async (req, res) => {
           }`,
           brand: item.Product_Cloth.design.Brand.DesignBrand_Name,
           name: item.Product_Cloth.design.Design_Name,
+          size: item.Size_Info.Size_ID,
+          cloth: true,
         };
     });
     res.status(200).json(data);
