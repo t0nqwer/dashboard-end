@@ -10,6 +10,8 @@ import productRoutes from "./routes/product.js";
 import fabricRoutes from "./routes/fabric.js";
 import webRoutes from "./routes/web.js";
 import stockRoutes from "./routes/stock.js";
+import { createServer } from "http";
+import { Server } from "socket.io";
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -29,6 +31,19 @@ app.use("/fabric", fabricRoutes);
 app.use("/web", webRoutes);
 app.use("/stock", stockRoutes);
 const port = parseInt(process.env.PORT) || 7070;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`helloworld: listening on http://localhost:${port}`);
+});
+
+const io = new Server({
+  pingTimeout: 60000,
+  cors: {
+    origin: ["http://localhost:3000", ["https://khwantadashboard.web.app/"]],
+    // credentials: true,
+  },
+});
+io.attach(server);
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
 });
