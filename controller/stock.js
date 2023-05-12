@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export const generateBarcode = async (req, res) => {
+  await prisma.stock_Info.deleteMany();
   try {
     const getclothpruduct = await prisma.product_Cloth.findMany({
       select: {
@@ -119,7 +120,12 @@ export const getDataForStock = async (req, res) => {
         },
         Size_Info: {
           select: {
-            Size_ID: true,
+            Size: {
+              select: {
+                Size_ID: true,
+                Size_Sort: true,
+              },
+            },
           },
         },
       },
@@ -153,9 +159,10 @@ export const getDataForStock = async (req, res) => {
           }`,
           brand: item.Product_Cloth.design.Brand.DesignBrand_Name,
           name: item.Product_Cloth.design.Design_Name,
-          size: item.Size_Info.Size_ID,
+          size: item.Size_Info.Size.Size_ID,
           cloth: true,
           price: item.Product_Cloth.price,
+          sort: item.Size_Info.Size.Size_Sort,
         };
     });
     res.status(200).json(data);

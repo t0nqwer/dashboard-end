@@ -402,7 +402,7 @@ export const productList = async (req, res) => {
       skip: clothindex,
       take: clothtake,
     });
-    console.log(ClothProduct);
+
     const Cloth = ClothProduct.map((e) => {
       return {
         Id: e.product_id,
@@ -426,7 +426,6 @@ export const productList = async (req, res) => {
               }`,
       };
     });
-    console.log(Cloth);
 
     res
       .status(200)

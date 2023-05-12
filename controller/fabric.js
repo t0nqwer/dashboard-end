@@ -101,3 +101,21 @@ export const getAddFabric = async (req, res) => {
       .json({ error: "ไม่สามารถเรียกดูข้อมูลได้ โปรดลองอีกครั้ง" });
   }
 };
+
+export const selectFabric = async (req, res) => {
+  try {
+    const fabric = await prisma.fabric.findMany({
+      select: {
+        Fabric_ID: true,
+        Weaving: true,
+        Color: true,
+        Pattern: true,
+        Type: true,
+        Product: true,
+      },
+    });
+    res.status(200).json({ fabric });
+  } catch (error) {
+    req.status(400).json({ error: error.message });
+  }
+};
