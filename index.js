@@ -31,17 +31,19 @@ app.use("/fabric", fabricRoutes);
 app.use("/web", webRoutes);
 app.use("/stock", stockRoutes);
 const port = parseInt(process.env.PORT) || 7070;
-// const server = app.listen(port, () => {
-//   console.log(`helloworld: listening on http://localhost:${port}`);
-// });
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`helloworld: listening on http://localhost:${port}`);
 });
-// const io = new Server({
-//   pingTimeout: 60000,
-// });
-// io.attach(server);
 
-// io.on("connection", (socket) => {
-//   console.log("a user connected");
-// });
+const io = new Server({
+  pingTimeout: 60000,
+  cors: {
+    origin: ["http://localhost:3000", ["https://khwantadashboard.web.app/"]],
+    // credentials: true,
+  },
+});
+io.attach(server);
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+});
