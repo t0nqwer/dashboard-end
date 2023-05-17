@@ -37,10 +37,6 @@ const server = app.listen(port, () => {
 
 const io = new Server({
   pingTimeout: 60000,
-  cors: {
-    origin: ["http://localhost:3000", ["https://khwantadashboard.web.app/"]],
-    // credentials: true,
-  },
 });
 io.attach(server);
 
