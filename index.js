@@ -33,18 +33,18 @@ app.use("/stock", stockRoutes);
 const port = parseInt(process.env.PORT) || 7070;
 const server = createServer(app);
 
-const io = new Server({
-  pingTimeout: 60000,
-  cors: {
-    origin: "*",
-    // credentials: true,
-  },
-});
-io.attach(server);
+// const io = new Server({
+//   pingTimeout: 60000,
+//   cors: {
+//     origin: "*",
+//     // credentials: true,
+//   },
+// });
+// io.attach(server);
 
-io.on("connection", (socket) => {
-  console.log("a user connected");
-});
+// io.on("connection", (socket) => {
+//   console.log("a user connected");
+// });
 
 server.listen(port, () => {
   console.log(`helloworld: listening on http://localhost:${port}`);
