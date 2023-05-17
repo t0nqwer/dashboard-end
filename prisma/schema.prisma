@@ -203,6 +203,8 @@ model Product_Cloth {
   price                Decimal                @db.Decimal(20, 2)
   Product_Cloth_Detail Product_Cloth_Detail[]
   Stock_Info           Stock_Info[]
+  ProductOne           ProductSet[]           @relation("one")
+  ProductTwo           ProductSet[]           @relation("two")
 
   @@index([fabric_id])
   @@index([code])
@@ -246,6 +248,17 @@ model FabricType {
   ID     Int      @id @default(autoincrement())
   name   String
   fabric Fabric[]
+}
+
+model ProductSet {
+  Id           Int            @id @default(autoincrement())
+  ProductOne   Int
+  ProductTwo   Int
+  ProductOneID Product_Cloth? @relation("one", fields: [ProductOne], references: [product_id])
+  ProductTwoID Product_Cloth? @relation("two", fields: [ProductTwo], references: [product_id])
+  Price Int 
+  @@index([ProductOne])
+  @@index([ProductTwo])
 }
 
 model Stock_Info {

@@ -262,7 +262,15 @@ export const getSingledesign = async (req, res) => {
         },
         product: {
           select: {
-            fabric: true,
+            fabric: {
+              select: {
+                Fabric_ID: true,
+                Weaving: true,
+                Color: true,
+                Pattern: true,
+                Type: true,
+              },
+            },
             product_id: true,
             price: true,
           },
