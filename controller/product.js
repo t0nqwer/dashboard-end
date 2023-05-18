@@ -148,82 +148,6 @@ export const productList = async (req, res) => {
   const numberStartIndex = (+page - 1) * limit;
 
   try {
-    const countCloth = await prisma.product_Cloth.count({
-      where: {
-        OR: [
-          {
-            code: { contains: search },
-          },
-          {
-            fabric: {
-              Type: {
-                name: {
-                  contains: search,
-                },
-              },
-            },
-          },
-          {
-            fabric: {
-              Color: {
-                FabricColorTechnique_name: {
-                  contains: search,
-                },
-              },
-            },
-          },
-          {
-            fabric: {
-              Pattern: {
-                FabricPatternName: {
-                  contains: search,
-                },
-              },
-            },
-          },
-          {
-            fabric: {
-              Weaving: {
-                weaving_name: {
-                  contains: search,
-                },
-              },
-            },
-          },
-          {
-            design: { Design_Name: { contains: search } },
-          },
-          {
-            design: {
-              Category: { Design_Category_Name: { contains: search } },
-            },
-          },
-          {
-            design: {
-              Brand: {
-                DesignBrand_Name: {
-                  contains: search,
-                },
-              },
-            },
-          },
-          {
-            design: {
-              Pattern: {
-                Pattern_Design_Name: {
-                  contains: search,
-                },
-              },
-            },
-          },
-          {
-            description: {
-              contains: search,
-            },
-          },
-        ],
-      },
-    });
     const NonClothProductcount = await prisma.product.count({
       where: {
         OR: [
@@ -255,17 +179,7 @@ export const productList = async (req, res) => {
       },
     });
 
-    const numberPage = (countCloth + NonClothProductcount) / limit;
-    const clothindex = numberStartIndex < countCloth ? numberStartIndex : 0;
-    const clothtake =
-      countCloth > numberStartIndex
-        ? countCloth - numberStartIndex > 20
-          ? 20
-          : countCloth - numberStartIndex
-        : 0;
-    const NonClothindex =
-      countCloth > numberStartIndex ? 0 : numberStartIndex - countCloth + 1;
-    const NonClothtake = limit - clothtake;
+    const numberPage = NonClothProductcount / limit;
 
     const NonClothProduct = await prisma.product.findMany({
       select: {
@@ -304,28 +218,27 @@ export const productList = async (req, res) => {
           },
         ],
       },
-      skip: NonClothindex,
-      take: NonClothtake,
+      skip: numberStartIndex,
+      take: limit,
     });
-    const ClothProduct = await prisma.product_Cloth.findMany({
-      select: {
-        product_id: true,
-        code: true,
-        fabric: {
-          select: {
-            Fabric_ID: true,
-            Weaving: true,
-            Color: true,
-            Pattern: true,
-            Type: true,
-          },
-        },
-        description: true,
-        design: true,
-        Front_Thumbnail: true,
-        price: true,
-      },
+
+    res.status(200).json({ NonClothProduct, user, page: { numberPage } });
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const productClothList = async (req, res) => {
+  const user = req.user;
+  const { search, page, query } = req.query;
+  const limit = 20;
+  const numberStartIndex = (+page - 1) * limit;
+
+  try {
+    const countCloth = await prisma.product_Cloth.count({
       where: {
+        code: { contains: query },
         OR: [
           {
             code: { contains: search },
@@ -399,8 +312,103 @@ export const productList = async (req, res) => {
           },
         ],
       },
-      skip: clothindex,
-      take: clothtake,
+    });
+    const numberPage = countCloth / limit;
+    const ClothProduct = await prisma.product_Cloth.findMany({
+      select: {
+        product_id: true,
+        code: true,
+        fabric: {
+          select: {
+            Fabric_ID: true,
+            Weaving: true,
+            Color: true,
+            Pattern: true,
+            Type: true,
+          },
+        },
+        description: true,
+        design: true,
+        Front_Thumbnail: true,
+        price: true,
+      },
+      where: {
+        code: { contains: query },
+        OR: [
+          {
+            code: { contains: search },
+          },
+          {
+            fabric: {
+              Type: {
+                name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Color: {
+                FabricColorTechnique_name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Pattern: {
+                FabricPatternName: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            fabric: {
+              Weaving: {
+                weaving_name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            design: { Design_Name: { contains: search } },
+          },
+          {
+            design: {
+              Category: { Design_Category_Name: { contains: search } },
+            },
+          },
+          {
+            design: {
+              Brand: {
+                DesignBrand_Name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            design: {
+              Pattern: {
+                Pattern_Design_Name: {
+                  contains: search,
+                },
+              },
+            },
+          },
+          {
+            description: {
+              contains: search,
+            },
+          },
+        ],
+      },
+      skip: numberStartIndex,
+      take: limit,
     });
 
     const Cloth = ClothProduct.map((e) => {
@@ -427,11 +435,33 @@ export const productList = async (req, res) => {
       };
     });
 
-    res
-      .status(200)
-      .json({ NonClothProduct, Cloth, user, page: { numberPage } });
+    res.status(200).json({ Cloth, user, page: numberPage });
   } catch (error) {
-    console.log(error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const getQueryData = async (req, res) => {
+  const user = req.user;
+  try {
+    const code = await prisma.cloth_Design.findMany({
+      select: {
+        Code: true,
+      },
+    });
+    const NewCode = [
+      ...new Set(
+        code.map((e) => {
+          const char1 = e.Code.charAt(0);
+          const char2 = e.Code.charAt(1);
+          if (+char2 === 0) return char1;
+          if (+char2) return char1;
+          else return `${char1}${char2}`;
+        })
+      ),
+    ];
+    res.status(200).json({ code: NewCode, user });
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };

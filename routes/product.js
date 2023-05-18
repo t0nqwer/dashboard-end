@@ -15,6 +15,8 @@ import {
   deletePhoto,
   updateWebStatus,
   updatePriceCloth,
+  productClothList,
+  getQueryData,
 } from "../controller/product.js";
 import { requireAuth } from "../middleware/Authverify.js";
 
@@ -26,6 +28,8 @@ router.post("/addKhwanta", addKhwanta);
 router.post("/addImport", addImport);
 router.post("/addCloth", addCloth);
 router.get("/productList", productList);
+router.get("/productClothList", productClothList);
+router.get("/getquerydata", getQueryData);
 router.get("/getAddCloth", getAddCloth);
 router.get("/getAddKhwanta", getAddKhwanta);
 router.get("/getAddImport", getAddImport);
