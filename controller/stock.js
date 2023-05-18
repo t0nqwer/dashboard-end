@@ -170,3 +170,12 @@ export const getDataForStock = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const deleteStock = async (req, res) => {
+  try {
+    await prisma.stock_Info.deleteMany();
+    res.status(200).json({ message: "success" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
