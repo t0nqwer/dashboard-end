@@ -5,6 +5,7 @@ import {
   AddFabricWeaving,
   getAddFabric,
   selectFabric,
+  updateFabric,
 } from "../controller/fabric.js";
 import { requireAuth } from "../middleware/Authverify.js";
 
@@ -16,5 +17,6 @@ router.post("/AddFabricWeaving", AddFabricWeaving);
 router.post("/AddFabric", AddFabric);
 router.get("/GetAddFabric", getAddFabric);
 router.get("/fabriclist", selectFabric);
+router.post("/UpdateFabric", updateFabric);
 
 export default router;

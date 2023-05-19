@@ -119,3 +119,76 @@ export const selectFabric = async (req, res) => {
     req.status(400).json({ error: error.message });
   }
 };
+
+export const updateFabric = async (req, res) => {
+  const { code, productId, fabricId } = req.body;
+  try {
+    console.log(code, productId, fabricId);
+    const check = await prisma.product_Cloth.findMany({
+      where: { code: code, fabric_id: fabricId },
+    });
+    if (check.length > 0) throw Error("มีสินค้านี้ในระบบแล้ว");
+    const data = await prisma.product_Cloth.update({
+      where: {
+        product_id: +productId,
+      },
+      data: {
+        fabric_id: fabricId,
+      },
+      select: {
+        product_id: true,
+        code: true,
+        Forweb: true,
+        IsHero: true,
+        fabric: {
+          select: {
+            Fabric_ID: true,
+            Weaving: true,
+            Color: true,
+            Pattern: true,
+            Type: true,
+          },
+        },
+        description: true,
+        design: {
+          select: {
+            Design_Name: true,
+            Brand: true,
+            Category: true,
+            Pattern: true,
+            Size: {
+              select: {
+                Size_ID: true,
+                Size_De_Info: {
+                  select: {
+                    Detail: true,
+                    Info: true,
+                  },
+                },
+              },
+              orderBy: {
+                Size: {
+                  Size_Sort: "asc",
+                },
+              },
+            },
+          },
+        },
+        Front_img: true,
+        Back_img: true,
+        price: true,
+        Product_Cloth_Detail: {
+          select: {
+            Img_Url: true,
+          },
+        },
+        Stock_Info: true,
+      },
+    });
+
+    res.status(200).json({ product: data, Res: "อัพเดทผ้าเรียบร้อยแล้ว" });
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).json({ error: error.message });
+  }
+};
