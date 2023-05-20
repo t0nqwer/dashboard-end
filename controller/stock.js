@@ -199,6 +199,13 @@ export const UpdateStockbarcode = async (req, res) => {
     const getcurrentbarcode = await prisma.stock_Info.findMany({
       select: { Product_Id: true, Product_Cloth_Id: true },
     });
+
+    const getProduct = await prisma.product.findMany({
+      select: { Product_ID: true },
+    });
+    const productlist = getProduct
+      .map((item) => item.Product_ID)
+      .sort(compareNumbers);
     const currentclothbarcode = [
       ...new Set(
         getcurrentbarcode
@@ -208,13 +215,56 @@ export const UpdateStockbarcode = async (req, res) => {
           .filter((item) => item !== null)
       ),
     ];
+    const currentProductbarcode = [
+      ...new Set(
+        getcurrentbarcode
+          .map((item) => {
+            if (item.Product_Id) return item.Product_Id;
+          })
+          .filter((item) => item !== null && item !== undefined)
+      ),
+    ];
+
+    const addProduct = productlist.filter(
+      (x) => !currentProductbarcode.includes(x)
+    );
 
     const addcloth = clothpruductlist.filter(
       (x) => !currentclothbarcode.includes(x)
     );
-    const deletecloth = currentclothbarcode
-      .sort(compareNumbers)
-      .filter((x) => x === 359);
+
+    const product = await prisma.$transaction(
+      addProduct.map((e) =>
+        prisma.product.findMany({
+          where: { Product_ID: e },
+          select: {
+            Product_ID: true,
+            Product_Category_ID: true,
+            Product_Supplier_ID: true,
+          },
+        })
+      )
+    );
+    const nonclothproductlist = product.flat().map((item) => {
+      return {
+        Barcode: `OT${
+          item.Product_ID.toString().length === 1
+            ? `00${item.Product_ID}`
+            : item.Product_ID.toString().length === 2
+            ? `0${item.Product_ID}`
+            : item.Product_ID
+        }${
+          item.Product_Category_ID.toString().length === 1
+            ? `0${item.Product_Category_ID}`
+            : item.Product_Category_ID
+        }${
+          item.Product_Supplier_ID.toString().length === 1
+            ? `0${item.Product_Supplier_ID}`
+            : item.Product_Supplier_ID
+        }`,
+        Product_Id: item.Product_ID,
+      };
+    });
     const getAddCloth = await prisma.$transaction(
       addcloth.map((e) =>
         prisma.product_Cloth.findUnique({
@@ -248,7 +298,8 @@ export const UpdateStockbarcode = async (req, res) => {
         });
         return size;
       })
-      .flat();
+      .flat()
+      .concat(nonclothproductlist);
 
     const createbarcode = await prisma.Stock_Info.createMany({
       data: list,
@@ -257,7 +308,7 @@ export const UpdateStockbarcode = async (req, res) => {
     console.log(
       `delete ${currentclothbarcode.length} barcode add ${createbarcode.count} barcode`,
       addcloth,
-      deletecloth,
+      addProduct,
       list,
       createbarcode
     );
