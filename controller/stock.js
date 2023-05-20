@@ -179,3 +179,88 @@ export const deleteStock = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+function compareNumbers(a, b) {
+  return a - b;
+}
+export const UpdateStockbarcode = async (req, res) => {
+  try {
+    const getclothpruduct = await prisma.product_Cloth.findMany({
+      select: {
+        product_id: true,
+      },
+    });
+    const clothpruductlist = getclothpruduct
+      .map((item) => item.product_id)
+      .sort(compareNumbers);
+    const getcurrentbarcode = await prisma.stock_Info.findMany({
+      select: { Product_Id: true, Product_Cloth_Id: true },
+    });
+    const currentclothbarcode = [
+      ...new Set(
+        getcurrentbarcode
+          .map((item) => {
+            if (item.Product_Cloth_Id) return item.Product_Cloth_Id;
+          })
+          .filter((item) => item !== null)
+      ),
+    ];
+
+    const addcloth = clothpruductlist.filter(
+      (x) => !currentclothbarcode.includes(x)
+    );
+    const deletecloth = currentclothbarcode
+      .sort(compareNumbers)
+      .filter((x) => x === 359);
+    const getAddCloth = await prisma.$transaction(
+      addcloth.map((e) =>
+        prisma.product_Cloth.findUnique({
+          where: { product_id: e },
+          select: {
+            product_id: true,
+            design: {
+              select: {
+                Size: true,
+              },
+            },
+            fabric: true,
+          },
+        })
+      )
+    );
+    const list = getAddCloth
+      .map((item) => {
+        const size = item.design.Size.map((Size) => {
+          return {
+            Product_Cloth_Id: item.product_id,
+            Size_Info_Id: Size.Size_Info_ID,
+            Barcode: `${Size.code.split("t").join("")}${
+              item.fabric.Fabric_ID.toString().length === 1
+                ? `00${item.fabric.Fabric_ID}`
+                : item.fabric.Fabric_ID.toString().length === 2
+                ? `0${item.fabric.Fabric_ID}`
+                : item.fabric.Fabric_ID
+            }${Size.Size_ID === "FREESIZE" ? `F` : Size.Size_ID}`,
+          };
+        });
+        return size;
+      })
+      .flat();
+
+    const createbarcode = await prisma.Stock_Info.createMany({
+      data: list,
+      skipDuplicates: true,
+    });
+    console.log(
+      `delete ${currentclothbarcode.length} barcode add ${createbarcode.count} barcode`,
+      addcloth,
+      deletecloth,
+      list,
+      createbarcode
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+setInterval(UpdateStockbarcode, 60000);

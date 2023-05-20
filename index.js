@@ -11,7 +11,7 @@ import fabricRoutes from "./routes/fabric.js";
 import webRoutes from "./routes/web.js";
 import stockRoutes from "./routes/stock.js";
 import { createServer } from "http";
-import { Server } from "socket.io";
+
 dotenv.config();
 const app = express();
 app.use(express.json());
@@ -32,19 +32,6 @@ app.use("/web", webRoutes);
 app.use("/stock", stockRoutes);
 const port = parseInt(process.env.PORT) || 7070;
 const server = createServer(app);
-
-// const io = new Server({
-//   pingTimeout: 60000,
-//   cors: {
-//     origin: "*",
-//     // credentials: true,
-//   },
-// });
-// io.attach(server);
-
-// io.on("connection", (socket) => {
-//   console.log("a user connected");
-// });
 
 server.listen(port, () => {
   console.log(`helloworld: listening on http://localhost:${port}`);
