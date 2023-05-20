@@ -151,6 +151,9 @@ export const getDataForStock = async (req, res) => {
           }${
             item.Product_Cloth.fabric.Color.FabricColorTechnique_name === "เคมี"
               ? ""
+              : item.Product_Cloth.fabric.Color.FabricColorTechnique_name ===
+                "eco-printed"
+              ? item.Product_Cloth.fabric.Color.FabricColorTechnique_name
               : `ย้อมสี${item.Product_Cloth.fabric.Color.FabricColorTechnique_name}`
           }${
             item.Product_Cloth.fabric?.Pattern?.FabricPatternName
