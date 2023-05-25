@@ -17,6 +17,8 @@ import {
   updatePriceCloth,
   productClothList,
   getQueryData,
+  createBarcode,
+  notifynewPriduct,
 } from "../controller/product.js";
 import { requireAuth } from "../middleware/Authverify.js";
 
@@ -26,7 +28,7 @@ router.use(requireAuth);
 router.post("/addSupplier", addSupplier);
 router.post("/addKhwanta", addKhwanta);
 router.post("/addImport", addImport);
-router.post("/addCloth", addCloth);
+router.post("/addCloth", addCloth, createBarcode, notifynewPriduct);
 router.get("/productList", productList);
 router.get("/productClothList", productClothList);
 router.get("/getquerydata", getQueryData);

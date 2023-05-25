@@ -199,7 +199,6 @@ export const UpdateStockbarcode = async (req, res) => {
     const getcurrentbarcode = await prisma.stock_Info.findMany({
       select: { Product_Id: true, Product_Cloth_Id: true },
     });
-
     const getProduct = await prisma.product.findMany({
       select: { Product_ID: true },
     });
@@ -301,6 +300,25 @@ export const UpdateStockbarcode = async (req, res) => {
       .flat()
       .concat(nonclothproductlist);
 
+    const getproductsize = await prisma.stock_Info.findMany({
+      where: {
+        Size_Info_Id: {
+          not: null,
+        },
+      },
+      select: {
+        Size_Info_Id: true,
+      },
+    });
+    const redu = [...new Set(getproductsize.map((item) => item.Size_Info_Id))];
+    const getcurrentsize = prisma.size_Info
+      .findMany({
+        select: {
+          Size_Info_ID: true,
+        },
+      })
+      .then((data) => data.map((item) => item.Size_Info_ID));
+    const getsize = (await getcurrentsize).filter((x) => !redu.includes(x));
     const createbarcode = await prisma.Stock_Info.createMany({
       data: list,
       skipDuplicates: true,
@@ -310,11 +328,12 @@ export const UpdateStockbarcode = async (req, res) => {
       addcloth,
       addProduct,
       list,
-      createbarcode
+      createbarcode,
+      getsize
     );
   } catch (error) {
     console.log(error);
   }
 };
 
-setInterval(UpdateStockbarcode, 60000);
+// setInterval(UpdateStockbarcode, 10000);

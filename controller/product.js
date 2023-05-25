@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import { socketconnect } from "../socket.js";
+
 const prisma = new PrismaClient();
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from "../firebase.js";
@@ -104,7 +106,7 @@ export const addImport = async (req, res) => {
     res.status(400).json({ error: "ไม่สามารถเพิ่มได้" });
   }
 };
-export const addCloth = async (req, res) => {
+export const addCloth = async (req, res, next) => {
   const data = req.body.data;
   const img = req.body.img;
   const user = req.user;
@@ -120,6 +122,15 @@ export const addCloth = async (req, res) => {
         Front_Thumbnail: `https://storage.googleapis.com/khwantadashboard.appspot.com/Product/front/${data.code}${data.fabric_id}front_300x450`,
         price: +data.price,
       },
+      select: {
+        product_id: true,
+        design: {
+          select: {
+            Size: true,
+          },
+        },
+        fabric: true,
+      },
     });
 
     const detail = img[0].map(async (e) => {
@@ -131,13 +142,144 @@ export const addCloth = async (req, res) => {
       });
       return upload;
     });
+
+    req.product = product;
+    req.detail = detail;
+    next();
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: error.message });
+  }
+};
+export const createBarcode = async (req, res, next) => {
+  const product = req.product;
+  const detail = req.detail;
+  const data = req.body.data;
+  const img = req.body.img;
+  const user = req.user;
+  try {
+    console.log(product.design.Size);
+    const list = product.design.Size.map((Size) => {
+      return {
+        Product_Cloth_Id: product.product_id,
+        Size_Info_Id: Size.Size_Info_ID,
+        Barcode: `${Size.code.split("t").join("")}${
+          product.fabric.Fabric_ID.toString().length === 1
+            ? `00${product.fabric.Fabric_ID}`
+            : product.fabric.Fabric_ID.toString().length === 2
+            ? `0${product.fabric.Fabric_ID}`
+            : product.fabric.Fabric_ID
+        }${Size.Size_ID === "FREESIZE" ? `F` : Size.Size_ID}`,
+      };
+    });
+    const date = await prisma.stock_Info.createMany({
+      data: list,
+    });
+
+    req.date = date;
+    next();
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: error.message });
+  }
+};
+export const notifynewPriduct = async (req, res) => {
+  try {
+    const product = req.product;
+    const detail = req.detail;
+    const data = req.body.data;
+    const img = req.body.img;
+    const user = req.user;
+    const notifydata = await prisma.stock_Info.findMany({
+      where: {
+        Product_Cloth_Id: product.product_id,
+      },
+      select: {
+        Barcode: true,
+        Product: {
+          select: {
+            Title: true,
+            Price: true,
+            Product_ID: true,
+            Supplier: true,
+            product_category: true,
+          },
+        },
+        Product_Cloth: {
+          select: {
+            code: true,
+            fabric: {
+              select: {
+                Fabric_ID: true,
+                Weaving: true,
+                Color: true,
+                Pattern: true,
+                Type: true,
+              },
+            },
+            design: {
+              select: {
+                Brand: {
+                  select: {
+                    DesignBrand_Name: true,
+                  },
+                },
+                Design_Name: true,
+              },
+            },
+            price: true,
+            product_id: true,
+          },
+        },
+        Size_Info: {
+          select: {
+            Size: {
+              select: {
+                Size_ID: true,
+                Size_Sort: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const list = notifydata.map((item) => {
+      return {
+        barcode: item.Barcode,
+        code: item.Product_Cloth.code,
+        fabric: `ผ้า${item.Product_Cloth.fabric.Type.name}${
+          item.Product_Cloth.fabric.Weaving.weaving_name
+        }${
+          item.Product_Cloth.fabric.Color.FabricColorTechnique_name === "เคมี"
+            ? ""
+            : item.Product_Cloth.fabric.Color.FabricColorTechnique_name ===
+              "eco-printed"
+            ? item.Product_Cloth.fabric.Color.FabricColorTechnique_name
+            : `ย้อมสี${item.Product_Cloth.fabric.Color.FabricColorTechnique_name}`
+        }${
+          item.Product_Cloth.fabric?.Pattern?.FabricPatternName
+            ? `${item.Product_Cloth.fabric.Pattern.FabricPatternName}`
+            : ""
+        }`,
+        brand: item.Product_Cloth.design.Brand.DesignBrand_Name,
+        name: item.Product_Cloth.design.Design_Name,
+        size: item.Size_Info.Size.Size_ID,
+        cloth: true,
+        price: +item.Product_Cloth.price,
+        sort: item.Size_Info.Size.Size_Sort,
+      };
+    });
+    socketconnect.emit("newCloth", {
+      data: list,
+    });
+    console.log(list);
     res.status(200).json({
       Success: "เพิ่มสินค้าเรียบร้อย",
       data: { product, detail },
       user,
     });
   } catch (error) {
-    console.log(error);
     res.status(400).json({ error: error.message });
   }
 };
@@ -973,6 +1115,11 @@ export const updatePriceCloth = async (req, res) => {
           },
         },
       },
+    });
+
+    socketconnect.emit("price", {
+      barcode: update.Stock_Info.map((e) => e.Barcode),
+      price: update.price,
     });
 
     res.status(200).json({ product: update, Res: "อัพเดทราคาเรียนร้อย" });

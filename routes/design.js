@@ -8,6 +8,9 @@ import {
   deleteDesignDetailImage,
   addDesignDetailImg,
   updateDesignData,
+  updateDesignSize,
+  addNewSize,
+  notifynewsize,
 } from "../controller/design.js";
 import { requireAuth } from "../middleware/Authverify.js";
 const router = express.Router();
@@ -20,6 +23,12 @@ router.get("/deletedesign/:id", DelDesign);
 router.get("/singledesign/:id", getSingledesign);
 router.post("/deleteDetailImage", deleteDesignDetailImage);
 router.post("/updateDetail", addDesignDetailImg);
-router.post("/updateDesign/:id", updateDesignData);
+router.post(
+  "/updateDesign/:id",
+  updateDesignData,
+  updateDesignSize,
+  addNewSize,
+  notifynewsize
+);
 
 export default router;

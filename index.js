@@ -11,6 +11,7 @@ import fabricRoutes from "./routes/fabric.js";
 import webRoutes from "./routes/web.js";
 import stockRoutes from "./routes/stock.js";
 import { createServer } from "http";
+import { socketconnect } from "./socket.js";
 
 dotenv.config();
 const app = express();
@@ -22,8 +23,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-/* Routes */
-app.use("/socket.io", (req, res) => res.send("socket.io"));
 app.use("/design", designRoutes);
 app.use("/user", userRoutes);
 app.use("/product", productRoutes);

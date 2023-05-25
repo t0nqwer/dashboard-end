@@ -47,7 +47,6 @@ export const GetSingleProductforWeb = async (req, res) => {
   const { id } = req.params;
 
   try {
-    console.log(id);
     const data = await prisma.product_Cloth.findUnique({
       where: { product_id: +id },
       select: {
