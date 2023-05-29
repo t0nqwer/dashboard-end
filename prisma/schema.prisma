@@ -47,9 +47,10 @@ model DesignBrand {
 }
 
 model Design_Category {
-  Design_Category_ID   Int            @id @default(autoincrement())
+  Design_Category_ID   Int               @id @default(autoincrement())
   Design_Category_Name String
   ClothDesign          Cloth_Design[]
+  ExamplesProduct      ExamplesProduct[]
 }
 
 model PatternDesign {
@@ -250,27 +251,56 @@ model FabricType {
   fabric Fabric[]
 }
 
+model ExamplesProduct {
+  id                         Int                          @id @default(autoincrement())
+  name                       String
+  category_id                Int
+  categoty                   Design_Category              @relation(fields: [category_id], references: [Design_Category_ID])
+  Price                      Int
+  Description                String?
+  Front_img                  String
+  Back_img                   String
+  Front_Small                String
+  ExamplesProductDetailImage ExamplesProductDetailImage[]
+  Stock_Info                 Stock_Info[]
+
+  @@index([category_id])
+}
+
+model ExamplesProductDetailImage {
+  id               Int             @id @default(autoincrement())
+  ExamplrProductId Int
+  ExampleProduct   ExamplesProduct @relation(fields: [ExamplrProductId], references: [id])
+  Url              String
+
+  @@index([ExamplrProductId])
+}
+
 model ProductSet {
   Id           Int            @id @default(autoincrement())
   ProductOne   Int
   ProductTwo   Int
   ProductOneID Product_Cloth? @relation("one", fields: [ProductOne], references: [product_id])
   ProductTwoID Product_Cloth? @relation("two", fields: [ProductTwo], references: [product_id])
-  Price Int 
+  Price        Int
+
   @@index([ProductOne])
   @@index([ProductTwo])
 }
 
 model Stock_Info {
-  Barcode          String         @id
-  Product_Cloth_Id Int?
-  Product_Id       Int?
-  Size_Info_Id     String?
-  Product          Product?       @relation(fields: [Product_Id], references: [Product_ID])
-  Product_Cloth    Product_Cloth? @relation(fields: [Product_Cloth_Id], references: [product_id])
-  Size_Info        Size_Info?     @relation(fields: [Size_Info_Id], references: [Size_Info_ID])
+  Barcode           String           @id
+  Product_Cloth_Id  Int?
+  Product_Id        Int?
+  Size_Info_Id      String?
+  ExampleProduct_Id Int?
+  ExampleProduct    ExamplesProduct? @relation(fields: [ExampleProduct_Id], references: [id])
+  Product           Product?         @relation(fields: [Product_Id], references: [Product_ID])
+  Product_Cloth     Product_Cloth?   @relation(fields: [Product_Cloth_Id], references: [product_id])
+  Size_Info         Size_Info?       @relation(fields: [Size_Info_Id], references: [Size_Info_ID])
 
   @@index([Product_Cloth_Id])
   @@index([Product_Id])
   @@index([Size_Info_Id])
+  @@index([ExampleProduct_Id])
 }
