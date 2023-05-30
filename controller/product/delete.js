@@ -93,6 +93,41 @@ export const deleteDetailPhoto = async (req, res) => {
               });
             });
         }
+        if (input.type === "Example") {
+          prisma.examplesProductDetailImage
+            .deleteMany({
+              where: {
+                Url: input.url,
+              },
+            })
+            .then(async () => {
+              const product = await prisma.examplesProduct.findUnique({
+                where: {
+                  id: +input.Product_ID,
+                },
+                select: {
+                  id: true,
+                  name: true,
+                  categoty: true,
+                  Price: true,
+                  Front_img: true,
+                  Stock_Info: true,
+                  Back_img: true,
+                  ExamplesProductDetailImage: {
+                    select: {
+                      Url: true,
+                    },
+                  },
+                  Stock_Info: true,
+                },
+              });
+              res.status(200).json({
+                Res: "ลบรูปเรียบร้อย",
+                product,
+                user,
+              });
+            });
+        }
       })
       .catch((error) => {
         console.log(error.message);

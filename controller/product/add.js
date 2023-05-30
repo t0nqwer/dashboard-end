@@ -340,3 +340,46 @@ export const AddExampleProductCloth = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const AddExampleProductClothDetail = async (req, res) => {
+  const user = req.user;
+  try {
+    const product = await prisma.examplesProduct.update({
+      where: {
+        id: +req.body.id,
+      },
+      data: {
+        ExamplesProductDetailImage: {
+          create: [
+            {
+              Url: req.body.img,
+            },
+          ],
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        categoty: true,
+        Price: true,
+        Front_img: true,
+        Stock_Info: true,
+        Back_img: true,
+        ExamplesProductDetailImage: {
+          select: {
+            Url: true,
+          },
+        },
+        Stock_Info: true,
+      },
+    });
+    res.status(200).json({
+      Res: "เพิ่มรูปเรียบร้อย",
+      product,
+      user,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(400).json(error.message);
+  }
+};

@@ -3,6 +3,7 @@ import express from "express";
 import { requireAuth } from "../middleware/Authverify.js";
 import {
   AddExampleProductCloth,
+  AddExampleProductClothDetail,
   addCloth,
   addImport,
   addKhwanta,
@@ -19,6 +20,7 @@ import {
   getExampleList,
   getQueryData,
   getSingleCloth,
+  getSingleExample,
   getSingleProduct,
   productClothList,
   productList,
@@ -48,6 +50,7 @@ router.get("/getSingleProduct/:id", getSingleProduct);
 router.get("/getaddexample", getAddExample);
 router.get("/checkduplicatexample/:name", CheckDuplicateExample);
 router.get("/exampleList", getExampleList);
+router.get("/singleExample/:id", getSingleExample);
 // post
 router.post("/addSupplier", addSupplier);
 router.post("/addKhwanta", addKhwanta);
@@ -59,4 +62,5 @@ router.post("/deletePhoto", deletePhoto);
 router.post("/changeWebStatus", updateWebStatus);
 router.post("/ChangePriceCloth", updatePriceCloth);
 router.post("/addexample", AddExampleProductCloth);
+router.post("/addExampleImgDetail", AddExampleProductClothDetail);
 export default router;

@@ -560,3 +560,33 @@ export const CheckDuplicateExample = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const getSingleExample = async (req, res) => {
+  const user = req.user;
+  console.log(+req.params.id);
+  try {
+    const product = await prisma.examplesProduct.findUnique({
+      where: {
+        id: +req.params.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        categoty: true,
+        Price: true,
+        Front_img: true,
+        Stock_Info: true,
+        Back_img: true,
+        ExamplesProductDetailImage: {
+          select: {
+            Url: true,
+          },
+        },
+        Stock_Info: true,
+      },
+    });
+    res.status(200).json({ product, user });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
