@@ -147,6 +147,7 @@ model Product {
   Product_Category_ID Int              @default(1)
   Supplier            Product_Supplier @relation(fields: [Product_Supplier_ID], references: [ID])
   Product_Supplier_ID Int
+  created             DateTime         @default(now())
   Product_Detail      Product_Detail[]
   Stock_Info          Stock_Info[]
 
@@ -202,6 +203,7 @@ model Product_Cloth {
   design               Cloth_Design           @relation(fields: [code], references: [Code])
   fabric               Fabric                 @relation(fields: [fabric_id], references: [Fabric_ID])
   price                Decimal                @db.Decimal(20, 2)
+  created              DateTime               @default(now())
   Product_Cloth_Detail Product_Cloth_Detail[]
   Stock_Info           Stock_Info[]
   ProductOne           ProductSet[]           @relation("one")
@@ -261,6 +263,7 @@ model ExamplesProduct {
   Front_img                  String
   Back_img                   String
   Front_Small                String
+  created                    DateTime                     @default(now())
   ExamplesProductDetailImage ExamplesProductDetailImage[]
   Stock_Info                 Stock_Info[]
 

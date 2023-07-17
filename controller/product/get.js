@@ -93,6 +93,7 @@ export const productList = async (req, res) => {
 };
 
 export const productClothList = async (req, res) => {
+  const start = Date.now();
   const user = req.user;
   const { search, page, query } = req.query;
   const limit = 20;
@@ -299,6 +300,8 @@ export const productClothList = async (req, res) => {
     });
 
     res.status(200).json({ Cloth, user, page: numberPage });
+    const end = Date.now();
+    console.log(`Execution time: ${end - start} ms`);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
