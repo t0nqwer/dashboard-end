@@ -424,7 +424,7 @@ export const updateDesignSize = async (req, res, next) => {
       req.newSize = newSize;
       next();
     }
-  } catch {
+  } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
