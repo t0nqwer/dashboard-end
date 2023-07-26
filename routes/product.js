@@ -27,7 +27,9 @@ import {
 } from "../controller/product/get.js";
 import {
   deleteDetailPhoto,
+  deleteExample,
   deletePhoto,
+  deleteProduct,
 } from "../controller/product/delete.js";
 import {
   updateDetailPhoto,
@@ -51,6 +53,8 @@ router.get("/getaddexample", getAddExample);
 router.get("/checkduplicatexample/:name", CheckDuplicateExample);
 router.get("/exampleList", getExampleList);
 router.get("/singleExample/:id", getSingleExample);
+router.get("/deleteExample/:id", deleteExample);
+router.get("/deleteProduct/:id", deleteProduct);
 // post
 router.post("/addSupplier", addSupplier);
 router.post("/addKhwanta", addKhwanta);

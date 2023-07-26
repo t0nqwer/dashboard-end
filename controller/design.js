@@ -333,52 +333,34 @@ export const updateDesignData = async (req, res, next) => {
   const data = req.body.ProductData;
   const size = req.body.SizeData;
   const { id } = req.params;
-  // console.log(user, data, id, size);
+  const { RemoveSize, RemoveDetail } = req.body;
   try {
-    // const updatedata = await prisma.$transaction([
-    //   prisma.cloth_Design.update({
-    //     where: {
-    //       Code: id,
-    //     },
-    //     data: {
-    //       Design_Name: data.title,
-    //       Product_Description: data.description,
-    //       Brand_ID: data.brand ? +data.brand : undefined,
-    //       Category_ID: data.category ? +data.category : undefined,
-    //       Pattern_ID: data.pattern ? +data.pattern : undefined,
-    //     },
-    //   }),
-    //   ...size.map((e) =>
-    //     prisma.size_Info.upsert({
-    //       where: {
-    //         Size_Info_ID: `${id}${e.size}`,
-    //       },
-    //       update: {},
-    //       create: {
-    //         Size_Info_ID: `${id}${e.size}`,
-    //         Size_ID: e.size,
-    //         code: id,
-    //       },
-    //     })
-    //   ),
-    //   ...size.map((e) =>
-    //     prisma.size_De_Info.upsert({
-    //       where: {
-    //         Size_De_Info_ID: `${data.code}${e.size}-${e.detail}`,
-    //       },
-    //       update: {
-    //         Info: +e.data,
-    //       },
-    //       create: {
-    //         Size_De_Info_ID: `${data.code}${e.size}-${e.detail}`,
-    //         Size_De_ID: +e.detail,
-    //         Size_Info_ID: `${id}${e.size}`,
-    //         Info: +e.data,
-    //       },
-    //     })
-    //   ),
-    // ]);
-
+    const arrSizeInfo = RemoveSize?.map((e) => `${id}${e}`);
+    await prisma.size_Info.deleteMany({
+      where: {
+        Size_Info_ID: {
+          in: arrSizeInfo,
+        },
+      },
+    });
+    const allSize = await prisma.size_Info.findMany({
+      where: {
+        code: id,
+      },
+      select: {
+        Size_Info_ID: true,
+      },
+    });
+    const arrSizeDeInfo = allSize
+      .map((e) => e.Size_Info_ID)
+      .flatMap((e) => RemoveDetail.map((d) => `${e}-${d}`));
+    await prisma.size_De_Info.deleteMany({
+      where: {
+        Size_De_Info_ID: {
+          in: arrSizeDeInfo,
+        },
+      },
+    });
     next();
   } catch (error) {
     res.status(400).json({ error: error.message });

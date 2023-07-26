@@ -36,6 +36,12 @@ export const addKhwanta = async (req, res) => {
   const user = req.user;
   console.log(data);
   try {
+    const check = await prisma.product.findMany({
+      where: {
+        Title: data.name,
+      },
+    });
+    if (check.length > 0) throw Error("มีสินค้าในระบบแล้ว.");
     const product = await prisma.product.create({
       data: {
         Title: data.name,
@@ -47,24 +53,54 @@ export const addKhwanta = async (req, res) => {
         Product_Category_ID: +data.category_id,
         Product_Supplier_ID: 1,
         Description: data.descript,
+        Product_Detail: {
+          create: [...img[0].map((e) => ({ Img_Url: e }))],
+        },
       },
     });
 
-    const detail = img[0].map(async (e) => {
-      const upload = await prisma.product_Detail.create({
-        data: {
-          Img_Url: e,
-          Product_ID: product.Product_ID,
-        },
-      });
-      return upload;
+    const createdata = {
+      Barcode: `OT${
+        product.Product_ID.toString().length === 1
+          ? `00${product.Product_ID}`
+          : product.Product_ID.toString().length === 2
+          ? `0${product.Product_ID}`
+          : product.Product_ID
+      }${
+        product.Product_Category_ID.toString().length === 1
+          ? `0${product.Product_Category_ID}`
+          : product.Product_Category_ID
+      }${
+        product.Product_Supplier_ID.toString().length === 1
+          ? `0${product.Product_Supplier_ID}`
+          : product.Product_Supplier_ID
+      }`,
+      Product_Id: product.Product_ID,
+    };
+    const createBarcode = await prisma.stock_Info.create({
+      data: createdata,
+    });
+    const list = {
+      barcode: createdata.Barcode,
+      code: "",
+      fabric: "",
+      brand: "Khwanta",
+      name: product.Title,
+      size: "",
+      cloth: false,
+      price: +product.Price,
+    };
+    socketconnect.emit("newexample", {
+      data: list,
     });
     res.status(200).json({
       Success: "เพิ่มสินค้าเรียบร้อย",
-      data: { product, detail },
+      data: { product },
       user,
+      createBarcode,
     });
   } catch (error) {
+    console.log(error.message);
     res.status(400).json({ error: "ไม่สามารถเพิ่มได้" });
   }
 };
@@ -74,6 +110,13 @@ export const addImport = async (req, res) => {
   const user = req.user;
 
   try {
+    const check = await prisma.product.findMany({
+      where: {
+        Title: data.name,
+      },
+    });
+
+    if (check.length > 0) throw Error("มีสินค้าในระบบแล้ว.");
     const product = await prisma.product.create({
       data: {
         Title: data.name,
@@ -85,24 +128,54 @@ export const addImport = async (req, res) => {
         Product_Category_ID: +data.category_id,
         Product_Supplier_ID: +data.supplier_id,
         Description: data.descript,
+        Product_Detail: {
+          create: [...img[0].map((e) => ({ Img_Url: e }))],
+        },
       },
     });
 
-    const detail = img[0].map(async (e) => {
-      const upload = await prisma.product_Detail.create({
-        data: {
-          Img_Url: e,
-          Product_ID: product.Product_ID,
-        },
-      });
-      return upload;
+    const createdata = {
+      Barcode: `OT${
+        product.Product_ID.toString().length === 1
+          ? `00${product.Product_ID}`
+          : product.Product_ID.toString().length === 2
+          ? `0${product.Product_ID}`
+          : product.Product_ID
+      }${
+        product.Product_Category_ID.toString().length === 1
+          ? `0${product.Product_Category_ID}`
+          : product.Product_Category_ID
+      }${
+        product.Product_Supplier_ID.toString().length === 1
+          ? `0${product.Product_Supplier_ID}`
+          : product.Product_Supplier_ID
+      }`,
+      Product_Id: product.Product_ID,
+    };
+    const createBarcode = await prisma.stock_Info.create({
+      data: createdata,
+    });
+    const list = {
+      barcode: createdata.Barcode,
+      code: "",
+      fabric: "",
+      brand: "Khwanta",
+      name: product.Title,
+      size: "",
+      cloth: false,
+      price: +product.Price,
+    };
+    socketconnect.emit("newexample", {
+      data: list,
     });
     res.status(200).json({
       Success: "เพิ่มสินค้าเรียบร้อย",
-      data: { product, detail },
+      data: { product },
       user,
+      createBarcode,
     });
   } catch (error) {
+    console.log(error.message);
     res.status(400).json({ error: "ไม่สามารถเพิ่มได้" });
   }
 };

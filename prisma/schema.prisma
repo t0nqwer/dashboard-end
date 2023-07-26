@@ -99,7 +99,7 @@ model Size {
 
 model Size_Info {
   Size_Info_ID String         @id @unique @db.VarChar(50)
-  Design       Cloth_Design   @relation(fields: [code], references: [Code])
+  Design       Cloth_Design   @relation(fields: [code], references: [Code], onDelete: Cascade)
   Size         Size           @relation(fields: [Size_ID], references: [Size_ID])
   Size_ID      String         @db.VarChar(10)
   code         String
@@ -120,7 +120,7 @@ model Size_De_Info {
   Size_De_Info_ID String    @id
   Detail          Size_De   @relation(fields: [Size_De_ID], references: [Size_De_ID])
   Size_De_ID      Int
-  Size_Info       Size_Info @relation(fields: [Size_Info_ID], references: [Size_Info_ID])
+  Size_Info       Size_Info @relation(fields: [Size_Info_ID], references: [Size_Info_ID], onDelete: Cascade)
   Size_Info_ID    String
   Info            Decimal   @db.Decimal(10, 2)
 
@@ -165,7 +165,7 @@ model Product_Supplier {
 model Product_Detail {
   ID         Int     @id @default(autoincrement())
   Img_Url    String  @db.Text
-  Product    Product @relation(fields: [Product_ID], references: [Product_ID])
+  Product    Product @relation(fields: [Product_ID], references: [Product_ID], onDelete: Cascade)
   Product_ID Int
 
   @@index([Product_ID])
@@ -216,7 +216,7 @@ model Product_Cloth {
 model Product_Cloth_Detail {
   ID         Int           @id @default(autoincrement())
   Img_Url    String        @db.Text
-  Product    Product_Cloth @relation(fields: [Product_ID], references: [product_id])
+  Product    Product_Cloth @relation(fields: [Product_ID], references: [product_id], onDelete: Cascade)
   Product_ID Int
 
   @@index([Product_ID])
@@ -273,7 +273,7 @@ model ExamplesProduct {
 model ExamplesProductDetailImage {
   id               Int             @id @default(autoincrement())
   ExamplrProductId Int
-  ExampleProduct   ExamplesProduct @relation(fields: [ExamplrProductId], references: [id])
+  ExampleProduct   ExamplesProduct @relation(fields: [ExamplrProductId], references: [id], onDelete: Cascade)
   Url              String
 
   @@index([ExamplrProductId])
@@ -297,10 +297,10 @@ model Stock_Info {
   Product_Id        Int?
   Size_Info_Id      String?
   ExampleProduct_Id Int?
-  ExampleProduct    ExamplesProduct? @relation(fields: [ExampleProduct_Id], references: [id])
-  Product           Product?         @relation(fields: [Product_Id], references: [Product_ID])
+  ExampleProduct    ExamplesProduct? @relation(fields: [ExampleProduct_Id], references: [id], onDelete: Cascade)
+  Product           Product?         @relation(fields: [Product_Id], references: [Product_ID], onDelete: Cascade)
   Product_Cloth     Product_Cloth?   @relation(fields: [Product_Cloth_Id], references: [product_id])
-  Size_Info         Size_Info?       @relation(fields: [Size_Info_Id], references: [Size_Info_ID])
+  Size_Info         Size_Info?       @relation(fields: [Size_Info_Id], references: [Size_Info_ID], onDelete: Cascade)
 
   @@index([Product_Cloth_Id])
   @@index([Product_Id])

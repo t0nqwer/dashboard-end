@@ -273,6 +273,9 @@ export const productClothList = async (req, res) => {
       },
       skip: numberStartIndex,
       take: limit,
+      orderBy: {
+        product_id: "desc",
+      },
     });
 
     const Cloth = ClothProduct.map((e) => {
@@ -461,6 +464,7 @@ export const getSingleProduct = async (req, res) => {
             Img_Url: true,
           },
         },
+        Stock_Info: true,
       },
     });
 
