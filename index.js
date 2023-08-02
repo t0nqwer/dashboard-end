@@ -10,6 +10,7 @@ import productRoutes from "./routes/product.js";
 import fabricRoutes from "./routes/fabric.js";
 import webRoutes from "./routes/web.js";
 import stockRoutes from "./routes/stock.js";
+import employeeRoutes from "./routes/employee.js";
 import { createServer } from "http";
 import { socketconnect } from "./socket.js";
 
@@ -29,6 +30,7 @@ app.use("/product", productRoutes);
 app.use("/fabric", fabricRoutes);
 app.use("/web", webRoutes);
 app.use("/stock", stockRoutes);
+app.use("/employee", employeeRoutes);
 const port = parseInt(process.env.PORT) || 7070;
 const server = createServer(app);
 

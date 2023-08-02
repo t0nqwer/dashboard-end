@@ -307,3 +307,26 @@ model Stock_Info {
   @@index([Size_Info_Id])
   @@index([ExampleProduct_Id])
 }
+
+model employee {
+  id          Int          @id @default(autoincrement())
+  first_name  String
+  last_name   String
+  first_name_thai String
+  last_name_thai String
+  date_joined DateTime
+  birthday    DateTime 
+  password    String
+  Profile_Img String?
+  role        employeeRole @relation(fields: [role_id], references: [id])
+  role_id     Int
+  token       String?
+
+  @@index([role_id])
+}
+
+model employeeRole {
+  id       Int        @id @default(autoincrement())
+  name     String
+  employee employee[]
+}

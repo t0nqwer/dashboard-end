@@ -6,6 +6,7 @@ import {
   GetProductforWeb,
   GetSingleProductforWeb,
   getQueryData,
+  getSizeDetail,
   getdetailphoto,
   updateDetailPhotoWeb,
 } from "../controller/website.js";
@@ -19,5 +20,6 @@ router.post("/ChangeDesignName", ChangeDesignName);
 router.post("/adddetailphoto", updateDetailPhotoWeb);
 router.get("/getquerycode", getQueryData);
 router.get("/getdetailphoto/:id", getdetailphoto);
+router.get("/sizeDetail/:id", getSizeDetail);
 
 export default router;

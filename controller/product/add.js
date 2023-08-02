@@ -90,8 +90,8 @@ export const addKhwanta = async (req, res) => {
       cloth: false,
       price: +product.Price,
     };
-    socketconnect.emit("newexample", {
-      data: list,
+    socketconnect.emit("addProduct", {
+      data: [list],
     });
     res.status(200).json({
       Success: "เพิ่มสินค้าเรียบร้อย",
@@ -165,8 +165,8 @@ export const addImport = async (req, res) => {
       cloth: false,
       price: +product.Price,
     };
-    socketconnect.emit("newexample", {
-      data: list,
+    socketconnect.emit("addProduct", {
+      data: [list],
     });
     res.status(200).json({
       Success: "เพิ่มสินค้าเรียบร้อย",
@@ -344,7 +344,7 @@ export const notifynewPriduct = async (req, res) => {
         sort: item.Size_Info.Size.Size_Sort,
       };
     });
-    socketconnect.emit("newCloth", {
+    socketconnect.emit("addProduct", {
       data: list,
     });
     console.log(list);
@@ -404,8 +404,8 @@ export const AddExampleProductCloth = async (req, res) => {
       cloth: true,
       price: +info.price,
     };
-    socketconnect.emit("newexample", {
-      data: list,
+    socketconnect.emit("addProduct", {
+      data: [list],
     });
     res.status(200).json({ createBarcode });
   } catch (error) {

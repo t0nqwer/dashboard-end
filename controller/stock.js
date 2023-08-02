@@ -128,6 +128,13 @@ export const getDataForStock = async (req, res) => {
             },
           },
         },
+        ExampleProduct: {
+          select: {
+            name: true,
+            categoty: true,
+            Price: true,
+          },
+        },
       },
     });
     const data = getclothpruduct.map((item) => {
@@ -166,6 +173,18 @@ export const getDataForStock = async (req, res) => {
           cloth: true,
           price: item.Product_Cloth.price,
           sort: item.Size_Info.Size.Size_Sort,
+        };
+      if (item.ExampleProduct)
+        return {
+          barcode: item.Barcode,
+          code: "",
+          fabric: "",
+          brand: "",
+          name: item.ExampleProduct.name,
+          size: "",
+          cloth: true,
+          price: item.ExampleProduct.Price,
+          sort: "",
         };
     });
     res.status(200).json(data);

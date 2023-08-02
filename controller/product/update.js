@@ -157,7 +157,7 @@ export const updateWebStatus = async (req, res) => {
 };
 export const updatePriceCloth = async (req, res) => {
   const user = req.user;
-  console.log(req.body);
+
   try {
     const update = await prisma.product_Cloth.update({
       where: { product_id: +req.body.id },

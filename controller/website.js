@@ -507,3 +507,36 @@ export const getdetailphoto = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const getSizeDetail = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const data = await prisma.cloth_Design.findUnique({
+      where: {
+        Code: id,
+      },
+      select: {
+        Size: {
+          select: {
+            Size_ID: true,
+            Size_De_Info: {
+              select: {
+                Size_De_Info_ID: true,
+                Detail: true,
+                Info: true,
+              },
+            },
+          },
+          orderBy: {
+            Size: {
+              Size_Sort: "asc",
+            },
+          },
+        },
+      },
+    });
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};

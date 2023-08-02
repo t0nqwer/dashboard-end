@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { socketconnect } from "../../socket.js";
 const prisma = new PrismaClient();
+
 import { ref, deleteObject } from "firebase/storage";
 import { storage } from "../../firebase.js";
 
@@ -212,6 +213,22 @@ export const deleteExample = async (req, res) => {
     });
 
     Promise.all(deletefunction).then(async () => {
+      const product = await prisma.examplesProduct.findUnique({
+        where: {
+          id: +id,
+        },
+        select: {
+          Stock_Info: {
+            select: {
+              Barcode: true,
+            },
+          },
+        },
+      });
+      const data = product.Stock_Info.map((item) => item.Barcode);
+      socketconnect.emit("deleteProduct", {
+        data: data,
+      });
       await prisma.examplesProduct.delete({
         where: {
           id: +id,
@@ -231,45 +248,56 @@ export const deleteProduct = async (req, res) => {
   const user = req.user;
   const id = req.params.id;
   try {
-    // const image = await prisma.product.findUnique({
-    //   where: {
-    //     Product_ID: +id,
-    //   },
-    //   select: {
-    //     Front_img: true,
-    //     Front_Thumbnail: true,
-    //     Back_img: true,
-    //     Back_Thumbnail: true,
-    //     Product_Detail: {
-    //       select: {
-    //         Img_Url: true,
-    //       },
-    //     },
-    //   },
-    // });
-    // const imageArr = [
-    //   image.Front_img,
-    //   image.Back_img,
-    //   ...image.Product_Detail.map((image) => image.Img_Url),
-    // ];
-    // const deletefunction = imageArr.map((image) => {
-    //   const desertRef = ref(storage, image);
-    //   deleteObject(desertRef);
-    // });
-    // Promise.all(deletefunction).then(async () => {
-    //   await prisma.product.delete({
-    //     where: {
-    //       Product_ID: +id,
-    //     },
-    //   });
-    //   res.status(200).json(imageArr);
-    // });
-    await prisma.product.delete({
+    const image = await prisma.product.findUnique({
       where: {
         Product_ID: +id,
       },
+      select: {
+        Front_img: true,
+        Front_Thumbnail: true,
+        Back_img: true,
+        Back_Thumbnail: true,
+        Product_Detail: {
+          select: {
+            Img_Url: true,
+          },
+        },
+      },
     });
-    res.status(200).json({ Success: "ลบสินค้าาเรียบร้อย", user });
+    const imageArr = [
+      image.Front_img,
+      image.Back_img,
+      ...image.Product_Detail.map((image) => image.Img_Url),
+    ];
+    const deletefunction = imageArr.map((image) => {
+      const desertRef = ref(storage, image);
+      deleteObject(desertRef);
+    });
+    Promise.all(deletefunction).then(async () => {
+      const product = await prisma.product.findUnique({
+        where: {
+          Product_ID: +id,
+        },
+        select: {
+          Stock_Info: {
+            select: {
+              Barcode: true,
+            },
+          },
+        },
+      });
+      const data = product.Stock_Info.map((item) => item.Barcode);
+      socketconnect.emit("deleteProduct", {
+        data: data,
+      });
+      await prisma.product.delete({
+        where: {
+          Product_ID: +id,
+        },
+      });
+
+      res.status(200).json({ Success: "ลบสินค้าาเรียบร้อย", user });
+    });
   } catch (error) {
     console.log(error);
     res.status(400).json({ error: "ไม่สามารถลบสินค้าได้" });

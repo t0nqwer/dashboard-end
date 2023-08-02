@@ -336,6 +336,17 @@ export const updateDesignData = async (req, res, next) => {
   const { RemoveSize, RemoveDetail } = req.body;
   try {
     const arrSizeInfo = RemoveSize?.map((e) => `${id}${e}`);
+    console.log(arrSizeInfo);
+    const deleteBarcode = await prisma.stock_Info.findMany({
+      where: {
+        Size_Info_Id: {
+          in: arrSizeInfo,
+        },
+      },
+      select: {
+        Barcode: true,
+      },
+    });
     await prisma.size_Info.deleteMany({
       where: {
         Size_Info_ID: {
@@ -360,6 +371,10 @@ export const updateDesignData = async (req, res, next) => {
           in: arrSizeDeInfo,
         },
       },
+    });
+    const data = deleteBarcode.map((item) => item.Barcode);
+    socketconnect.emit("deleteProduct", {
+      data: data,
     });
     next();
   } catch (error) {
@@ -420,7 +435,6 @@ export const updateDesignSize = async (req, res, next) => {
         .status(200)
         .json({ Success: "แก้ไขสินคั้าเรียบร้อย", user, updatedata });
     } else {
-      console.log(newSize);
       req.newSize = newSize;
       next();
     }
@@ -444,7 +458,7 @@ export const addNewSize = async (req, res, next) => {
         fabric: true,
       },
     });
-    console.log(newsize);
+
     const data = newsize.map((a) => {
       const ea = product.map((e) => {
         return {
@@ -461,10 +475,10 @@ export const addNewSize = async (req, res, next) => {
       });
       return ea;
     });
-    const addbarcode = await prisma.stock_Info.createMany({
+    await prisma.stock_Info.createMany({
       data: data.flat(),
     });
-    console.log(addbarcode);
+    // req.newbarcode = addbarcode;
     next();
   } catch (error) {
     console.log(error.message);
