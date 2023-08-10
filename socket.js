@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 // http://localhost:7080
 // "http://167.172.69.153/"
-export const socketconnect = io("http://localhost:7080", {
+export const socketconnect = io(process.env.SOCKET_URL, {
   reconnectionDelayMax: 10000,
   auth: {
     token: "kVdeNbeYcdcHPXGt",
@@ -10,3 +10,4 @@ export const socketconnect = io("http://localhost:7080", {
     "my-key": "my-value",
   },
 });
+``;
