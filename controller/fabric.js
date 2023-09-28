@@ -120,6 +120,58 @@ export const selectFabric = async (req, res) => {
   }
 };
 
+export const Getcurrent = async (req, res) => {
+  try {
+    const fabric = await prisma.fabric.findMany({
+      select: {
+        Fabric_ID: true,
+        Weaving: true,
+        Color: true,
+        Pattern: true,
+        Type: true,
+        Product: true,
+      },
+    });
+
+    const datafilter = fabric.filter((e) => e.Product.length > 0);
+    const resdata = {
+      count: fabric.length,
+      filter: datafilter.length,
+      Weaving: [...new Set(datafilter.map((e) => e.Weaving.weaving_name))],
+      Color: [
+        ...new Set(datafilter.map((e) => e.Color.FabricColorTechnique_name)),
+      ],
+      Pattern: [
+        ...new Set(datafilter.map((e) => e.Pattern?.FabricPatternName)),
+      ].filter((e) => e),
+      Type: [...new Set(datafilter.map((e) => e.Type.name))],
+      fabric: [
+        ...new Set(
+          datafilter.map((e) => ({
+            name: `ผ้า${e.Type.name}${e.Weaving.weaving_name}${
+              e.Color.FabricColorTechnique_name === "เคมี"
+                ? ""
+                : e.Color.FabricColorTechnique_name === "eco-printed"
+                ? e.Color.FabricColorTechnique_name
+                : `ย้อมสี${e.Color.FabricColorTechnique_name}`
+            }${
+              e?.Pattern?.FabricPatternName ? e?.Pattern?.FabricPatternName : ""
+            }`,
+            color: e.Color.FabricColorTechnique_name,
+            weaving: e.Weaving.weaving_name,
+            type: e.Type.name,
+            pattern: e.Pattern?.FabricPatternName,
+            id: e.Fabric_ID,
+          }))
+        ),
+      ],
+    };
+
+    res.status(200).json({ resdata });
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
 export const updateFabric = async (req, res) => {
   const { code, productId, fabricId } = req.body;
   try {
