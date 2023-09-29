@@ -13,6 +13,7 @@ import stockRoutes from "./routes/stock.js";
 import employeeRoutes from "./routes/employee.js";
 import { createServer } from "http";
 import { socketconnect } from "./socket.js";
+import { transferDesign, transferProduct } from "./controller/transfer.js";
 
 dotenv.config();
 const app = express();
@@ -31,6 +32,9 @@ app.use("/fabric", fabricRoutes);
 app.use("/web", webRoutes);
 app.use("/stock", stockRoutes);
 app.use("/employee", employeeRoutes);
+
+app.get("/transferDesign", transferDesign);
+app.get("/transferProduct", transferProduct);
 const port = parseInt(process.env.PORT) || 7070;
 const server = createServer(app);
 
