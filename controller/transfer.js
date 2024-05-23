@@ -95,3 +95,42 @@ export const transferProduct = async (req, res) => {
     res.json(convertdata);
   } catch (error) {}
 };
+
+export const transferOtherProduct = async (req, res) => {
+  try {
+    const data = await prisma.product.findMany({
+      select: {
+        Product_ID: true,
+        Title: true,
+        Price: true,
+        Front_img: true,
+        Back_img: true,
+        Description: true,
+        product_category: true,
+        Supplier: true,
+        Product_Detail: true,
+        Stock_Info: {
+          select: {
+            Barcode: true,
+          },
+        },
+      },
+    });
+    const convertdata = data.map((item) => ({
+      otherId: item.Product_ID,
+      name: item.Title,
+      price: item.Price,
+      frontImage: item.Front_img,
+      backImage: item.Back_img,
+      description: item.Description,
+      category: item.product_category.Product_Category_Name,
+      supplier: item.Supplier.Name,
+      DetailImage: item.Product_Detail.map((item) => item.Img_Url),
+      barcode: item.Stock_Info.map((item) => item.Barcode)[0],
+    }));
+    console.log(convertdata.length);
+    res.json(convertdata);
+  } catch (error) {
+    console.log(error);
+  }
+};

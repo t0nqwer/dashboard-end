@@ -224,7 +224,6 @@ export const addCloth = async (req, res, next) => {
     res.status(400).json({ error: error.message });
   }
 };
-
 export const createBarcode = async (req, res, next) => {
   const product = req.product;
   const detail = req.detail;
@@ -357,7 +356,6 @@ export const notifynewPriduct = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
 export const AddExampleProductCloth = async (req, res) => {
   console.log(req.body);
   const info = req.body.info;
@@ -413,7 +411,6 @@ export const AddExampleProductCloth = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
 export const AddExampleProductClothDetail = async (req, res) => {
   const user = req.user;
   try {
